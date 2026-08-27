@@ -423,15 +423,11 @@ class AgriConnectAPI {
 
 // Global API object
 if (typeof window !== 'undefined') {
-  window.AgriConnectAPI =
-    AgriConnectAPI;
-}
+  window.AgriConnectAPI = AgriConnectAPI;
 
-// Node.js / CommonJS support
-if (
-  typeof module !== 'undefined' &&
-  module.exports
-) {
-  module.exports =
-    AgriConnectAPI;
+  window.apiGet = AgriConnectAPI.apiGet.bind(AgriConnectAPI);
+  window.apiPost = AgriConnectAPI.apiPost.bind(AgriConnectAPI);
+  window.apiPut = AgriConnectAPI.apiPut.bind(AgriConnectAPI);
+  window.apiDelete = AgriConnectAPI.apiDelete.bind(AgriConnectAPI);
+  window.apiPatch = AgriConnectAPI.apiPatch.bind(AgriConnectAPI);
 }
