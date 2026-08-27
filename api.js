@@ -431,3 +431,6 @@ if (typeof window !== 'undefined') {
   window.apiDelete = AgriConnectAPI.apiDelete.bind(AgriConnectAPI);
   window.apiPatch = AgriConnectAPI.apiPatch.bind(AgriConnectAPI);
 }
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = AgriConnectAPI;
+}
