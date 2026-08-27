@@ -1,4 +1,5 @@
 // backend/server.js
+
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
@@ -8,7 +9,10 @@ const mongoose = require('mongoose');
 // Load environment variables from backend/.env
 dotenv.config({ path: path.join(__dirname, '.env') });
 
+// Database
 const connectDB = require('./config/db');
+
+// Routes
 const authRoutes = require('./routes/authRoutes');
 const farmRoutes = require('./routes/farmRoutes');
 const surveyorRoutes = require('./routes/surveyorRoutes');
@@ -20,124 +24,246 @@ const talukaRoutes = require('./routes/talukaRoutes');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// ── Production & Development CORS Configuration ──────────────────
+
+// ======================================================
+// CORS CONFIGURATION
+// ======================================================
+
 const allowedOrigins = [
-  'http://localhost:5000',
+  // Vercel frontend
+  'https://agriconnect-2026.vercel.app',
+
+  // Local development
   'http://localhost:5500',
   'http://localhost:3000',
   'http://localhost:5173',
-  'http://127.0.0.1:5000',
+
+  // 127.0.0.1
   'http://127.0.0.1:5500',
   'http://127.0.0.1:3000',
   'http://127.0.0.1:5173'
 ];
 
+// Add FRONTEND_URL from Render environment variables if available
 if (process.env.FRONTEND_URL) {
-  const customOrigins = process.env.FRONTEND_URL.split(',').map(u => u.trim().replace(/\/+$/, ''));
-  customOrigins.forEach(u => {
-    if (u && !allowedOrigins.includes(u)) allowedOrigins.push(u);
+  const frontendUrls = process.env.FRONTEND_URL
+    .split(',')
+    .map(url => url.trim().replace(/\/+$/, ''));
+
+  frontendUrls.forEach(url => {
+    if (url && !allowedOrigins.includes(url)) {
+      allowedOrigins.push(url);
+    }
   });
 }
 
-const corsOptions = {
-  origin: function (origin, callback) {
-    // Allow non-browser requests (Postman, curl, server-to-server, mobile app, local files)
-    if (!origin) return callback(null, true);
+app.use(
+  cors({
+    origin: function (origin, callback) {
 
-    const isMatch = allowedOrigins.some(allowed => {
-      if (allowed === '*' || origin === allowed) return true;
-      if (allowed.includes('*')) {
-        const regex = new RegExp('^' + allowed.replace(/\./g, '\\.').replace(/\*/g, '.*') + '$');
-        return regex.test(origin);
+      // Allow requests without Origin
+      // Example: Postman, curl, server-to-server
+      if (!origin) {
+        return callback(null, true);
       }
-      return false;
-    }) || origin.endsWith('.vercel.app') || /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin);
 
-    if (isMatch) {
-      callback(null, true);
-    } else {
-      console.warn(`[CORS Warning] Origin not explicitly in whitelist: ${origin}`);
-      // In production, allow all vercel/render or origins to ensure frontend never breaks
-      callback(null, true);
-    }
-  },
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin']
-};
+      // Allow known frontend origins
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
 
-app.use(cors(corsOptions));
-app.options('*', cors(corsOptions));
+      console.log('CORS request from:', origin);
+
+      return callback(new Error('Not allowed by CORS'));
+    },
+
+    credentials: true,
+
+    methods: [
+      'GET',
+      'POST',
+      'PUT',
+      'PATCH',
+      'DELETE',
+      'OPTIONS'
+    ],
+
+    allowedHeaders: [
+      'Content-Type',
+      'Authorization',
+      'X-Requested-With',
+      'Accept'
+    ]
+  })
+);
+
+
+// ======================================================
+// BODY PARSER
+// ======================================================
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Establish Database Connection
+
+// ======================================================
+// DATABASE CONNECTION
+// ======================================================
+
 connectDB();
 
-// ── Serve Frontend Static Files ─────────────────────────────────
+
+// ======================================================
+// SERVE FRONTEND STATIC FILES
+// ======================================================
+
 app.use(express.static(path.join(__dirname, '..')));
 
-// Root route serves index.html
+
+// ======================================================
+// ROOT ROUTE
+// ======================================================
+
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'index.html'));
 });
 
-// ── Health Check Endpoint ──────────────────────────────────────
+
+// ======================================================
+// HEALTH CHECK
+// ======================================================
+
 app.get('/api/health', (req, res) => {
+
   const state = mongoose.connection.readyState;
-  // 0 = disconnected, 1 = connected, 2 = connecting, 3 = disconnecting
+
+  // 0 = disconnected
+  // 1 = connected
+  // 2 = connecting
+  // 3 = disconnecting
+
   const isConnected = state === 1;
-  const dbStatus = state === 1 ? 'connected' : state === 2 ? 'connecting' : 'disconnected';
-  
+
+  const dbStatus =
+    state === 1
+      ? 'connected'
+      : state === 2
+        ? 'connecting'
+        : 'disconnected';
+
   res.status(isConnected ? 200 : 503).json({
     success: isConnected,
-    message: isConnected ? "AgriConnect backend is running" : `AgriConnect backend is running (Database ${dbStatus})`,
+
+    message: isConnected
+      ? 'AgriConnect backend is running'
+      : `AgriConnect backend is running (Database ${dbStatus})`,
+
     database: dbStatus,
-    databaseName: "Areeconnect_database",
+
+    databaseName: 'Areeconnect_database',
+
     environment: process.env.NODE_ENV || 'production',
+
     timestamp: new Date().toISOString()
   });
 });
 
-// ── API Routes ────────────────────────────────────────────────
+
+// ======================================================
+// API ROUTES
+// ======================================================
+
 app.use('/api/auth', authRoutes);
+
 app.use('/api/farms', farmRoutes);
+
 app.use('/api/surveyors', surveyorRoutes);
+
 app.use('/api/bookings', bookingRoutes);
+
 app.use('/api/candidates', candidateRoutes);
+
 app.use('/api/admin', adminRoutes);
+
 app.use('/api/talukas', talukaRoutes);
 
-// 404 Route Handler
+
+// ======================================================
+// 404 ROUTE
+// ======================================================
+
 app.use((req, res) => {
+
   res.status(404).json({
     success: false,
     message: `Route ${req.originalUrl} not found`
   });
+
 });
 
-// Global Error Handler
+
+// ======================================================
+// GLOBAL ERROR HANDLER
+// ======================================================
+
 app.use((err, req, res, next) => {
-  console.error('Unhandled server error:', err.message);
+
+  console.error('Unhandled server error:', err);
+
   res.status(err.status || 500).json({
     success: false,
     message: err.message || 'Internal Server Error'
   });
+
 });
 
-// Start Server (Bind to 0.0.0.0 for Render compatibility)
+
+// ======================================================
+// START SERVER
+// ======================================================
+
 const server = app.listen(PORT, '0.0.0.0', () => {
-  console.log(`\n======================================================`);
-  console.log(`🌾 AgriConnect Server & Web App Running!`);
-  console.log(`🌐 Host & Port:     0.0.0.0:${PORT}`);
-  console.log(`🌐 Local URL:       http://localhost:${PORT}`);
-  console.log(`🔑 Login Page:      http://localhost:${PORT}/login.html`);
-  console.log(`👑 Admin Page:      http://localhost:${PORT}/admin.html`);
-  console.log(`🌾 Farmer Page:     http://localhost:${PORT}/farmer.html`);
-  console.log(`📐 Surveyor Page:   http://localhost:${PORT}/surveyor.html`);
-  console.log(`📡 API Health:      http://localhost:${PORT}/api/health`);
-  console.log(`======================================================\n`);
+
+  console.log('');
+  console.log('======================================================');
+  console.log('🌾 AgriConnect Backend Running');
+  console.log('======================================================');
+
+  console.log(`🌐 Port: ${PORT}`);
+
+  console.log(`🌐 Local URL: http://localhost:${PORT}`);
+
+  console.log(
+    `🔑 Login Page: http://localhost:${PORT}/login.html`
+  );
+
+  console.log(
+    `👑 Admin Page: http://localhost:${PORT}/admin.html`
+  );
+
+  console.log(
+    `🌾 Farmer Page: http://localhost:${PORT}/farmer.html`
+  );
+
+  console.log(
+    `📐 Surveyor Page: http://localhost:${PORT}/surveyor.html`
+  );
+
+  console.log(
+    `📡 API Health: http://localhost:${PORT}/api/health`
+  );
+
+  console.log('======================================================');
+  console.log('');
+
 });
 
-module.exports = { app, server };
+
+// ======================================================
+// EXPORT
+// ======================================================
+
+module.exports = {
+  app,
+  server
+};
