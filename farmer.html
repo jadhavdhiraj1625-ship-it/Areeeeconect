@@ -1,0 +1,1142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AgriConnect – Farmer Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link rel="stylesheet" href="shared_styles.css" />
+  <style>
+    body { background: #07120a; }
+    .bg-farm-backdrop { background: #07120a; }
+    .farmer-layout {
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: 24px;
+      align-items: start;
+    }
+    .farmer-avatar {
+      width: 68px; height: 68px; border-radius: 50%;
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-size: 28px; margin-bottom: 12px;
+      box-shadow: 0 4px 14px rgba(34,197,94,.35);
+    }
+    /* ── Profile rows ────────────────────────────────────────── */
+    .profile-field-row { display: flex; justify-content: space-between; align-items: center;
+      padding: 9px 0; border-bottom: 1px solid #f3f4f6; font-size: 13px; }
+    .profile-field-row:last-child { border-bottom: none; }
+    .profile-field-label { color: #6b7280; font-weight: 500; }
+    .profile-field-val   { font-weight: 600; color: #111827; text-align: right; max-width: 180px; word-break: break-word; }
+    .badge-state-active { background:#dcfce7; color:#15803d; padding:3px 10px; border-radius:99px; font-size:12px; font-weight:700; }
+    .card-footer-note { font-size:11px; color:#9ca3af; margin-top:14px; border-top:1px solid #f3f4f6; padding-top:10px; }
+    /* ── Farm document list ─────────────────────────────────── */
+    .farm-doc-item {
+      background: #f9fafb; border-radius: 12px; padding: 12px 14px;
+      margin-bottom: 10px; border: 1px solid #f3f4f6; display: flex;
+      justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;
+    }
+    .farm-doc-item:hover { background: #f0fdf4; border-color: #bbf7d0; }
+    .farm-doc-item-info strong { display: block; font-size: 14px; font-weight: 700; color: #111827; }
+    .farm-doc-item-info span  { font-size: 12px; color: #6b7280; }
+    .farm-doc-item-cost { font-size: 15px; font-weight: 800; color: #15803d; }
+    /* ── Form elements ──────────────────────────────────────── */
+    .dash-form-group { margin-bottom: 14px; }
+    .dash-form-group label { font-size: 12px; font-weight: 600; color: #374151; display: block; margin-bottom: 4px; }
+    .dash-input {
+      width: 100%; padding: 10px 13px; border-radius: 9px;
+      border: 1.5px solid #d1d5db; font-size: 13px;
+      font-family: inherit; transition: border-color .2s; box-sizing: border-box;
+    }
+    .dash-input:focus { outline: none; border-color: #22c55e; }
+    .btn-dash-green {
+      background: linear-gradient(135deg,#22c55e,#16a34a); color:#fff;
+      border: none; border-radius: 10px; padding: 11px 22px;
+      font-size: 14px; font-weight: 700; cursor: pointer;
+      font-family: inherit; transition: opacity .2s, transform .15s; width: 100%;
+    }
+    .btn-dash-green:hover { opacity: .9; transform: translateY(-1px); }
+    .btn-dash-green:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+    /* ── Surveyor search ─────────────────────────────────────── */
+    .surveyor-results-box {
+      display: none; margin-top: 16px;
+      border: 1.5px solid #bbf7d0; border-radius: 14px; overflow: hidden;
+    }
+    .surveyor-results-box.visible { display: block; }
+    .surveyor-results-heading {
+      background: #f0fdf4; padding: 10px 16px;
+      font-size: 13px; font-weight: 700; color: #15803d;
+      border-bottom: 1px solid #bbf7d0;
+    }
+    .surveyor-item-row {
+      padding: 13px 16px; border-bottom: 1px solid #f3f4f6;
+      display: flex; justify-content: space-between; align-items: center;
+      background: #fff; transition: background .15s;
+    }
+    .surveyor-item-row:last-child { border-bottom: none; }
+    .surveyor-item-row:hover { background: #f9fafb; }
+    .surveyor-item-info { display: flex; align-items: center; gap: 12px; }
+    .surveyor-icon-circle {
+      width: 38px; height: 38px; border-radius: 50%;
+      background: #dbeafe; color: #1d4ed8;
+      display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0;
+    }
+    .surveyor-name { font-size: 14px; font-weight: 700; color: #111827; }
+    .surveyor-meta { font-size: 12px; color: #6b7280; margin-top: 2px; }
+    .btn-book-blue {
+      background: linear-gradient(135deg,#3b82f6,#2563eb); color: #fff;
+      border: none; border-radius: 8px; padding: 7px 16px;
+      font-size: 12px; font-weight: 700; cursor: pointer;
+      font-family: inherit; transition: opacity .2s, transform .15s; flex-shrink: 0;
+    }
+    .btn-book-blue:hover { opacity: .9; transform: translateY(-1px); }
+    .btn-disabled {
+      background: #e5e7eb; color: #9ca3af; border: none;
+      border-radius: 8px; padding: 7px 14px; font-size: 12px;
+      font-weight: 600; cursor: not-allowed; flex-shrink: 0;
+    }
+    /* ── Bookings ────────────────────────────────────────────── */
+    .booking-row {
+      background: #f9fafb; border-radius: 12px; padding: 14px 16px;
+      margin-bottom: 12px; border: 1px solid #f3f4f6;
+    }
+    .booking-row-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .booking-row-title { font-size: 14px; font-weight: 700; color: #111827; }
+    .booking-badges { display: flex; gap: 6px; align-items: center; }
+    .booking-row-meta { font-size: 12px; color: #6b7280; margin-bottom: 4px; }
+    .badge-blue   { background:#dbeafe; color:#1d4ed8; font-size:11px; font-weight:700; padding:3px 9px; border-radius:99px; }
+    .badge-orange { background:#ffedd5; color:#c2410c; font-size:11px; font-weight:700; padding:3px 9px; border-radius:99px; }
+    .badge-green  { background:#dcfce7; color:#15803d; font-size:11px; font-weight:700; padding:3px 9px; border-radius:99px; }
+    .badge-red    { background:#fee2e2; color:#dc2626; font-size:11px; font-weight:700; padding:3px 9px; border-radius:99px; }
+    .badge-paid   { background:#dcfce7; color:#15803d; font-size:11px; font-weight:700; padding:3px 9px; border-radius:99px; }
+    .badge-unpaid { background:#fee2e2; color:#dc2626; font-size:11px; font-weight:700; padding:3px 9px; border-radius:99px; }
+    .badge-gray   { background:#f3f4f6; color:#6b7280; font-size:11px; font-weight:700; padding:3px 9px; border-radius:99px; }
+    .btn-pay {
+      background: linear-gradient(135deg,#22c55e,#16a34a); color:#fff;
+      border: none; border-radius: 8px; padding: 7px 16px;
+      font-size: 12px; font-weight: 700; cursor: pointer;
+      font-family: inherit; transition: opacity .2s; margin-top: 8px;
+    }
+    .btn-pay:hover { opacity: .88; }
+    /* ── Notification strip ──────────────────────────────────── */
+    .notification-strip {
+      padding: 11px 15px; border-radius: 11px; margin-bottom: 14px;
+      font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 8px;
+    }
+    .notification-strip.success { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+    .notification-strip.error   { background: #fee2e2; color: #dc2626; border: 1px solid #fecaca; }
+    .notification-strip.info    { background: #dbeafe; color: #1d4ed8; border: 1px solid #bfdbfe; }
+    /* ── Empty state ─────────────────────────────────────────── */
+    .empty-state { text-align:center; padding:28px 14px; color:#9ca3af; font-size:13px; }
+    .empty-state i { font-size:34px; display:block; margin-bottom:10px; }
+    /* ── Star rating ─────────────────────────────────────────── */
+    .star-row { display:inline-flex; gap:2px; }
+    .star-filled { color:#f59e0b; }
+    .star-empty  { color:#d1d5db; }
+
+    /* ── Helpline Chat Widget ── */
+    #helpline-badge {
+      position: fixed; bottom: 28px; right: 28px;
+      background: linear-gradient(135deg,#22c55e,#16a34a);
+      color: #fff; border-radius: 50px; padding: 13px 22px;
+      font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 8px;
+      box-shadow: 0 6px 24px rgba(34,197,94,.45);
+      cursor: pointer; z-index: 1000; transition: transform .2s, box-shadow .2s;
+      font-family: 'Outfit', sans-serif;
+    }
+    #helpline-badge:hover { transform: translateY(-3px); box-shadow: 0 10px 32px rgba(34,197,94,.55); }
+    #helpline-badge .badge-dot {
+      width: 10px; height: 10px; border-radius: 50%;
+      background: #fbbf24; box-shadow: 0 0 0 3px rgba(251,191,36,.3);
+      animation: pulse-dot 1.5s ease-in-out infinite;
+    }
+    @keyframes pulse-dot {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50%       { transform: scale(1.3); opacity: .7; }
+    }
+    #chat-window {
+      position: fixed; bottom: 84px; right: 28px;
+      width: 360px; max-height: 480px; background: #fff;
+      border-radius: 18px; box-shadow: 0 16px 48px rgba(0,0,0,.22);
+      display: none; flex-direction: column; overflow: hidden;
+      z-index: 1001; border: 1.5px solid #e5e7eb;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      animation: slideUp .25s ease-out;
+    }
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    #chat-window.open { display: flex; }
+    .chat-header {
+      background: linear-gradient(135deg,#166534,#15803d);
+      color: #fff; padding: 14px 18px; display: flex;
+      justify-content: space-between; align-items: center;
+    }
+    .chat-header-title { font-size: 15px; font-weight: 800; font-family: 'Outfit', sans-serif; }
+    .chat-header-sub   { font-size: 11px; opacity: .8; margin-top: 1px; }
+    .chat-close-btn {
+      background: rgba(255,255,255,.2); border: none; border-radius: 50%;
+      width: 28px; height: 28px; color: #fff; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; font-size: 13px;
+    }
+    .chat-messages {
+      flex: 1; padding: 14px; overflow-y: auto; max-height: 300px;
+      display: flex; flex-direction: column; gap: 10px; background: #f9fafb;
+    }
+    .chat-msg {
+      max-width: 82%; padding: 9px 13px; border-radius: 13px;
+      font-size: 13px; line-height: 1.45; word-break: break-word;
+    }
+    .chat-msg.bot  { background: #fff; color: #111827; border: 1px solid #e5e7eb; border-bottom-left-radius: 3px; align-self: flex-start; }
+    .chat-msg.user { background: linear-gradient(135deg,#22c55e,#16a34a); color: #fff; border-bottom-right-radius: 3px; align-self: flex-end; }
+    .chat-input-row {
+      background: #fff; padding: 12px; display: flex; gap: 8px;
+      border-top: 1px solid #e5e7eb;
+    }
+    .chat-input-row input {
+      flex: 1; padding: 9px 12px; border-radius: 9px;
+      border: 1.5px solid #d1d5db; font-size: 13px;
+      font-family: inherit; transition: border-color .2s; outline: none;
+    }
+    .chat-input-row input:focus { border-color: #22c55e; }
+    .chat-send-btn {
+      background: linear-gradient(135deg,#22c55e,#16a34a); color:#fff;
+      border: none; border-radius: 9px; padding: 9px 14px;
+      cursor: pointer; font-size: 15px; transition: opacity .2s;
+    }
+    .chat-send-btn:hover { opacity: .88; }
+
+    @media (max-width: 900px) { .farmer-layout { grid-template-columns: 1fr; } }
+    @media (max-width: 480px) { #chat-window { width: calc(100vw - 40px); right: 20px; } }
+  </style>
+</head>
+<body class="bg-farm-backdrop">
+
+  <!-- ── HEADER ────────────────────────────────────────────── -->
+  <header class="dashboard-header-green" style="flex-wrap:wrap;gap:12px;">
+    <div>
+      <h1 style="margin:0;font-size:22px;font-weight:800;letter-spacing:-.3px;">
+        <i class="fa-solid fa-leaf" style="margin-right:10px;opacity:.85;"></i>
+        Farmer Dashboard
+      </h1>
+      <div style="display:flex;align-items:center;gap:10px;margin-top:3px;">
+        <p style="margin:0;font-size:13px;opacity:.85;font-weight:400;" id="header-welcome">Welcome!</p>
+        <span id="db-status-badge" style="padding:2px 9px;border-radius:99px;font-size:11px;font-weight:700;display:inline-flex;align-items:center;gap:5px;background:#ffffff22;color:#fff;">
+          <i class="fa-solid fa-spinner fa-spin"></i> Checking DB...
+        </span>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+      <a href="index.html" class="btn" style="color:#fff;text-decoration:none;background:rgba(255,255,255,0.18);padding:7px 14px;border-radius:8px;font-size:13px;font-weight:600;"><i class="fa-solid fa-house"></i> Home</a>
+      <a href="surveyor.html" class="btn" style="color:#fff;text-decoration:none;background:rgba(255,255,255,0.18);padding:7px 14px;border-radius:8px;font-size:13px;font-weight:600;"><i class="fa-solid fa-compass-drafting"></i> Surveyor</a>
+      <a href="admin.html" class="btn" style="color:#fff;text-decoration:none;background:rgba(255,255,255,0.18);padding:7px 14px;border-radius:8px;font-size:13px;font-weight:600;"><i class="fa-solid fa-lock"></i> Admin</a>
+      <button class="btn-header-logout" onclick="AgriConnectAuth.logout()">
+        <i class="fa-solid fa-arrow-right-from-bracket"></i> Logout
+      </button>
+    </div>
+  </header>
+
+  <!-- ── MAIN ──────────────────────────────────────────────── -->
+  <main style="max-width:1200px;margin:0 auto;padding:28px 20px 80px;">
+    <div id="page-notification" style="display:none;" class="notification-strip"></div>
+
+    <div class="farmer-layout">
+
+      <!-- ═══════════════════ LEFT COLUMN ═══════════════════ -->
+      <div>
+        <!-- 1. Profile Card -->
+        <div class="white-card" style="margin-bottom:22px;">
+          <div style="text-align:center;margin-bottom:16px;">
+            <div class="farmer-avatar" style="display:flex;margin:0 auto 14px;">
+              <i class="fa-solid fa-person"></i>
+            </div>
+            <div id="profile-name" style="font-size:18px;font-weight:800;color:#111827;"></div>
+            <div id="profile-mobile" style="font-size:12px;color:#6b7280;margin-top:2px;"></div>
+          </div>
+          <div id="profile-fields"></div>
+          <div class="card-footer-note">
+            <i class="fa-solid fa-circle-info" style="margin-right:5px;color:#22c55e;"></i>
+            Your contact is shared with assigned surveyors.
+          </div>
+        </div>
+
+        <!-- 2. Farm Document Summary -->
+        <div class="white-card">
+          <div class="white-card-title">
+            <i class="fa-solid fa-file-lines" style="color:#22c55e;"></i>
+            My Registered Farm Plots
+          </div>
+          <div id="farm-list-container"></div>
+        </div>
+      </div>
+
+      <!-- ═══════════════════ RIGHT COLUMN ══════════════════ -->
+      <div>
+        <!-- 3. Register Farm Plot -->
+        <div class="white-card" style="margin-bottom:22px;">
+          <div class="white-card-title">
+            <i class="fa-solid fa-tractor" style="color:#22c55e;"></i>
+            Register Farm Plot
+          </div>
+          <p style="font-size:13px;color:#6b7280;margin:0 0 16px;">
+            Enter details from official land documents for cost calculation.
+          </p>
+          <div id="farm-save-strip" style="display:none;" class="notification-strip success"></div>
+          <form id="farm-form" onsubmit="saveFarmPlot(event)">
+            <div class="dash-form-group">
+              <label for="farm-name">Farm Name / Reference</label>
+              <input class="dash-input" type="text" id="farm-name" placeholder="e.g. Plot 4-A, Khasra No. 112" required />
+            </div>
+            <div class="dash-form-group">
+              <label for="farm-location">Village / Location</label>
+              <input class="dash-input" type="text" id="farm-location" placeholder="e.g. Thalner, near highway" required />
+            </div>
+            <div class="dash-form-group">
+              <label for="farm-area">Farm Area (acres)</label>
+              <input class="dash-input" type="number" id="farm-area" step="0.01" min="0.01" placeholder="e.g. 2.50" required />
+            </div>
+            <div class="dash-form-group">
+              <label for="farm-contact">Contact Number</label>
+              <input class="dash-input" type="tel" id="farm-contact" placeholder="Your mobile number" required />
+            </div>
+            <div class="dash-form-group">
+              <label for="farm-survey-type">Type of Survey Work</label>
+              <select class="dash-input" id="farm-survey-type" required>
+                <option value="" disabled selected>Select required survey work...</option>
+                <option value="Boundary Tally">Boundary Tally &amp; Verification (Tally farm)</option>
+                <option value="Farm Subdivision">Farm Subdivision (Divide farm into parts)</option>
+                <option value="Layout & Landmark">Layout &amp; Landmark (Fix boundaries)</option>
+                <option value="Land Survey">Land Survey (Comprehensive measurement)</option>
+              </select>
+            </div>
+            <button type="submit" class="btn-dash-green" id="farm-submit-btn">
+              <i class="fa-solid fa-floppy-disk" style="margin-right:8px;"></i>Save &amp; Calculate Price
+            </button>
+          </form>
+        </div>
+
+        <!-- 4. Find & Book Surveyor -->
+        <div class="white-card" style="margin-bottom:22px;">
+          <div class="white-card-title">
+            <i class="fa-solid fa-magnifying-glass-location" style="color:#22c55e;"></i>
+            Search &amp; Book Nearest Surveyor
+          </div>
+          <p style="font-size:13px;color:#6b7280;margin:0 0 16px;">
+            Select your area and we'll find the nearest available surveyor using smart routing.
+          </p>
+          <div id="booking-strip" style="display:none;" class="notification-strip success"></div>
+          <form id="search-form" onsubmit="handleSurveyorSearch(event)">
+            <div class="dash-form-group">
+              <label for="search-area">Your Area / Nearest Node</label>
+              <select class="dash-input" id="search-area" required>
+                <option value="" disabled selected>Select your area…</option>
+              </select>
+            </div>
+            <button type="submit" class="btn-dash-green">
+              <i class="fa-solid fa-magnifying-glass" style="margin-right:8px;"></i>Search Surveyors
+            </button>
+          </form>
+
+          <div class="surveyor-results-box" id="surveyor-results-box">
+            <div class="surveyor-results-heading" id="surveyor-results-heading">
+              Available Surveyors:
+            </div>
+            <div id="surveyor-results-list"></div>
+          </div>
+        </div>
+
+        <!-- 5. My Bookings -->
+        <div class="white-card">
+          <div class="white-card-title">
+            <i class="fa-solid fa-calendar-check" style="color:#22c55e;"></i>
+            Active &amp; Past Bookings
+          </div>
+          <div id="bookings-container"></div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- ── NOTICE MODAL ── -->
+  <div id="notice-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:2000; align-items:center; justify-content:center;">
+    <div style="background:#fff; width:90%; max-width:600px; border-radius:12px; padding:24px; max-height:90vh; overflow-y:auto; position:relative; box-shadow:0 20px 25px -5px rgba(0,0,0,0.5);">
+      <button onclick="document.getElementById('notice-modal').style.display='none'" style="position:absolute; top:15px; right:15px; background:transparent; border:none; font-size:18px; cursor:pointer; color:#6b7280;">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+      <div style="text-align:center; border-bottom:2px solid #22c55e; padding-bottom:12px; margin-bottom:15px;">
+        <i class="fa-solid fa-award" style="font-size:32px; color:#16a34a;"></i>
+        <h2 style="margin:5px 0 0; color:#166534; font-family:'Outfit',sans-serif;">Official Demarcation Certificate</h2>
+        <p style="margin:0; font-size:12px; color:#6b7280;">AgriConnect Verified Land Record &bull; Govt Standards Compliant</p>
+      </div>
+      <div id="notice-content"></div>
+      <div style="margin-top:20px; border-top:1px solid #e5e7eb; padding-top:12px; display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:11px; color:#9ca3af;">Digitally Signed by Surveyor <strong id="notice-sign" style="color:#374151;"></strong></span>
+        <button class="btn-dash-green" onclick="window.print()" style="width:auto; padding:6px 16px; font-size:12px;">
+          <i class="fa-solid fa-print"></i> Print Certificate
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── FLOATING HELPLINE CHAT WIDGET ── -->
+  <div id="helpline-badge" onclick="toggleChat()">
+    <span class="badge-dot"></span>
+    <i class="fa-solid fa-headset"></i>
+    <span>AgriConnect Helpline</span>
+  </div>
+
+  <div id="chat-window">
+    <div class="chat-header">
+      <div>
+        <div class="chat-header-title"><i class="fa-solid fa-headset" style="margin-right:6px;"></i>AgriConnect Support</div>
+        <div class="chat-header-sub">Online &bull; Instant farm &amp; survey help</div>
+      </div>
+      <button class="chat-close-btn" onclick="toggleChat()"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="chat-messages" id="chat-messages">
+      <div class="chat-msg bot">
+        Namaste! 🙏 Welcome to AgriConnect Farmer Support. How can we help with your land survey today?
+      </div>
+    </div>
+    <div class="chat-input-row">
+      <input type="text" id="chat-input" placeholder="Type your question…" onkeydown="if(event.key==='Enter') sendChatMessage()" />
+      <button class="chat-send-btn" onclick="sendChatMessage()"><i class="fa-solid fa-paper-plane"></i></button>
+    </div>
+  </div>
+
+  <!-- ── SCRIPTS ───────────────────────────────────────────── -->
+  <script src="config.js?v=2.2"></script>
+  <script src="api.js?v=2.2"></script>
+  <script src="shared.js?v=2.2"></script>
+  <script>
+    let db;
+    let currentUser;
+    let farmsKey;
+    let farms = [];
+
+    // ── Boot ──────────────────────────────────────────────────
+    document.addEventListener('DOMContentLoaded', async () => {
+      // 1. Verify session for Farmer role; redirects to login if unauthenticated
+      currentUser = AgriConnectAuth.checkSession('Farmer');
+      if (!currentUser) return;
+
+      db = new AgriConnectDB();
+      window.AgriDB = db;
+
+      // 2. Refresh live profile directly from MongoDB Atlas /api/auth/me
+      try {
+        const meRes = await AgriConnectAPI.apiGet('/auth/me');
+        if (meRes && meRes.success && meRes.user) {
+          currentUser = { ...currentUser, ...meRes.user, role: 'Farmer' };
+          AgriConnectAPI.setCurrentUser(currentUser);
+        }
+      } catch (e) {
+        console.warn('Could not sync /auth/me profile:', e);
+      }
+
+      // 3. Fallback from local storage farmers if missing taluka/village
+      if ((!currentUser.village || !currentUser.taluka) && db.farmers && db.farmers[currentUser.mobile]) {
+        currentUser = { ...db.farmers[currentUser.mobile], ...currentUser };
+        AgriConnectAPI.setCurrentUser(currentUser);
+      }
+
+      farmsKey = `farms_${currentUser.mobile || 'farmer'}`;
+
+      // 4. Update status badges and prefill forms
+      updateDbStatusBadge();
+      document.getElementById('header-welcome').textContent = `Welcome, ${currentUser.name || 'Farmer'}!`;
+      
+      const contactInput = document.getElementById('farm-contact');
+      if (contactInput) {
+        contactInput.value = currentUser.mobile || '';
+      }
+
+      const locInput = document.getElementById('farm-location');
+      if (locInput && currentUser.village) {
+        locInput.placeholder = `e.g. ${currentUser.village}, near highway`;
+      }
+
+      // 5. Render profile card and options
+      renderProfile();
+      await loadTalukaOptions();
+      await loadFarms();
+      await renderBookings();
+      await searchLocalSurveyors();
+
+      const modal = document.getElementById('notice-modal');
+      if (modal) {
+        modal.addEventListener('click', (e) => {
+          if (e.target.id === 'notice-modal') modal.style.display = 'none';
+        });
+      }
+    });
+
+    async function loadTalukaOptions() {
+      const areaSelect = document.getElementById('search-area');
+      if (!areaSelect) return;
+
+      const farmerTaluka = (currentUser && currentUser.taluka ? currentUser.taluka : '').trim();
+
+      if (!farmerTaluka) {
+        areaSelect.innerHTML = '<option value="" selected disabled>Taluka not available</option>';
+        return;
+      }
+
+      let displayName = farmerTaluka.charAt(0).toUpperCase() + farmerTaluka.slice(1);
+      let nodeName = displayName;
+
+      try {
+        const res = await AgriConnectAPI.apiGet('/talukas');
+        if (res && res.success && Array.isArray(res.talukas)) {
+          const match = res.talukas.find(t => 
+            t.name.toLowerCase() === farmerTaluka.toLowerCase() ||
+            (t.displayName && t.displayName.toLowerCase() === farmerTaluka.toLowerCase())
+          );
+          if (match) {
+            displayName = match.displayName || (match.name.charAt(0).toUpperCase() + match.name.slice(1));
+            nodeName = match.node || displayName;
+          }
+        }
+      } catch (e) {
+        console.warn('Using local taluka name for search select');
+      }
+
+      // Automatically lock and display ONLY the farmer's authenticated Taluka (no cross-taluka dropdown)
+      areaSelect.innerHTML = `<option value="${nodeName}" data-taluka="${farmerTaluka.toLowerCase()}" selected>${displayName}</option>`;
+    }
+
+    async function updateDbStatusBadge() {
+      const badge = document.getElementById('db-status-badge');
+      if (!badge) return;
+      try {
+        const res = await AgriConnectAPI.apiGet('/health');
+        if (res && res.success) {
+          badge.innerHTML = '<i class="fa-solid fa-circle-check" style="color:#4ade80;"></i> Atlas DB: <strong>Connected</strong>';
+          badge.style.background = '#15803d';
+          badge.style.color = '#fff';
+        } else {
+          badge.innerHTML = '<i class="fa-solid fa-triangle-exclamation" style="color:#fde047;"></i> Local Mode (Server Offline)';
+          badge.style.background = '#854d0e';
+          badge.style.color = '#fff';
+        }
+      } catch (e) {
+        badge.innerHTML = '<i class="fa-solid fa-triangle-exclamation" style="color:#fde047;"></i> Local Mode (Server Offline)';
+        badge.style.background = '#854d0e';
+        badge.style.color = '#fff';
+      }
+    }
+
+    // ── Profile render ────────────────────────────────────────
+    function renderProfile() {
+      if (!currentUser) return;
+      document.getElementById('profile-name').textContent   = currentUser.name || 'Farmer';
+      document.getElementById('profile-mobile').textContent = currentUser.mobile || '—';
+
+      const fieldsEl = document.getElementById('profile-fields');
+      if (fieldsEl) {
+        fieldsEl.innerHTML = `
+          ${pRow('Mobile',  currentUser.mobile || '—')}
+          ${pRow('Email',   currentUser.email || '—')}
+          ${pRow('Village', currentUser.village || 'Thalner')}
+          ${pRow('Taluka',  capitalize(currentUser.taluka || 'thalner'))}
+          ${pRow('Status',  `<span class="badge-state-active">${currentUser.status || 'Active'}</span>`)}
+        `;
+      }
+    }
+
+    function pRow(label, val) {
+      return `<div class="profile-field-row">
+        <span class="profile-field-label">${label}</span>
+        <span class="profile-field-val">${val}</span>
+      </div>`;
+    }
+
+    // ── Farm list ─────────────────────────────────────────────
+    async function loadFarms() {
+      try {
+        const res = await AgriConnectAPI.apiGet('/farms');
+        if (res && res.success && Array.isArray(res.farms)) {
+          farms = res.farms.map(f => ({
+            id: f._id,
+            name: f.farmName,
+            location: f.location && f.location.address ? f.location.address : (typeof f.location === 'string' ? f.location : f.village),
+            village: f.village,
+            area: f.acreage,
+            contact: f.contactNumber,
+            surveyType: f.surveyType,
+            cost: f.estimatedCost,
+            registeredAt: f.createdAt
+          }));
+          localStorage.setItem(farmsKey, JSON.stringify(farms));
+          renderFarmList();
+          return;
+        }
+      } catch (e) {
+        console.warn('Using local farms fallback');
+      }
+
+      try {
+        const raw = localStorage.getItem(farmsKey);
+        farms = raw ? JSON.parse(raw) : [];
+        if (!Array.isArray(farms)) farms = [];
+      } catch { farms = []; }
+      renderFarmList();
+    }
+
+    function renderFarmList() {
+      const container = document.getElementById('farm-list-container');
+      if (!container) return;
+      if (!farms.length) {
+        container.innerHTML = `<div class="empty-state">
+          <i class="fa-solid fa-seedling"></i>No farm plots registered yet.
+        </div>`;
+        return;
+      }
+      container.innerHTML = farms.map((f) => `
+        <div class="farm-doc-item">
+          <div class="farm-doc-item-info">
+            <strong>${f.name}</strong>
+            <span><i class="fa-solid fa-location-dot" style="margin-right:4px;color:#22c55e;"></i>${f.location}</span>
+            <span style="display:block;margin-top:2px;color:#374151;font-weight:600;">${f.area} acres &bull; <span style="color:#3b82f6;">${f.surveyType || 'Boundary Tally'}</span></span>
+          </div>
+          <div class="farm-doc-item-cost">₹${(f.cost||0).toLocaleString('en-IN')}</div>
+        </div>`).join('');
+    }
+
+    // ── Save farm plot ────────────────────────────────────────
+    async function saveFarmPlot(e) {
+      e.preventDefault();
+      const name       = document.getElementById('farm-name').value.trim();
+      const location   = document.getElementById('farm-location').value.trim();
+      const area       = parseFloat(document.getElementById('farm-area').value);
+      const contact    = document.getElementById('farm-contact').value.trim();
+      const surveyType = document.getElementById('farm-survey-type').value;
+      const btn        = document.getElementById('farm-submit-btn');
+
+      if (!name || !location || isNaN(area) || area <= 0 || !surveyType) {
+        showPageNotification('Please fill all fields correctly.', 'error');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving to MongoDB Atlas…';
+
+      // 1. Try Backend REST API
+      try {
+        const res = await AgriConnectAPI.apiPost('/farms', {
+          farmName: name,
+          village: location.split(',')[0].trim(),
+          taluka: currentUser.taluka || 'thalner',
+          acreage: area,
+          surveyType: surveyType,
+          contactNumber: contact,
+          location: { address: location }
+        });
+        if (res && res.success && res.farm) {
+          showPageNotification(`Plot "${name}" saved in MongoDB Atlas! Calculated Survey Cost: ₹${(res.farm.estimatedCost||0).toLocaleString('en-IN')}`, 'success');
+          document.getElementById('farm-form').reset();
+          document.getElementById('farm-contact').value = currentUser.mobile || '';
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fa-solid fa-floppy-disk" style="margin-right:8px;"></i>Save &amp; Calculate Price';
+          await loadFarms();
+          await searchLocalSurveyors();
+          return;
+        }
+      } catch (err) {
+        console.warn('API error saving farm, using local fallback:', err);
+      }
+
+      // 2. Fallback
+      const cost = Math.ceil(area * 500);
+      const newFarm = { id: `farm-${Date.now()}`, name, location, area, contact, surveyType, cost, registeredAt: new Date().toISOString() };
+      farms.push(newFarm);
+      localStorage.setItem(farmsKey, JSON.stringify(farms));
+
+      const strip = document.getElementById('farm-save-strip');
+      strip.innerHTML = `<i class="fa-solid fa-circle-check"></i> Plot <strong>${name}</strong> saved! Estimated Survey Cost: <strong>₹${cost.toLocaleString('en-IN')}</strong>`;
+      strip.style.display = 'flex';
+      setTimeout(() => { strip.style.display = 'none'; }, 5000);
+
+      document.getElementById('farm-form').reset();
+      document.getElementById('farm-contact').value = currentUser.mobile || '';
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fa-solid fa-floppy-disk" style="margin-right:8px;"></i>Save &amp; Calculate Price';
+      renderFarmList();
+      await searchLocalSurveyors();
+    }
+
+    // ── Search surveyors ──────────────────────────────────────
+    function handleSurveyorSearch(e) {
+      e.preventDefault();
+      searchLocalSurveyors();
+    }
+
+    async function searchLocalSurveyors() {
+      const farmerTaluka = (currentUser && currentUser.taluka ? currentUser.taluka : '').toLowerCase().trim();
+      const box     = document.getElementById('surveyor-results-box');
+      const heading = document.getElementById('surveyor-results-heading');
+      const list    = document.getElementById('surveyor-results-list');
+      if (!box || !heading || !list) return;
+
+      if (!farmerTaluka) {
+        box.classList.add('visible');
+        heading.textContent = 'Taluka Not Available:';
+        list.innerHTML = `<div class="empty-state"><i class="fa-solid fa-circle-exclamation"></i> Taluka not available for this account. Please update your profile.</div>`;
+        return;
+      }
+
+      const displayArea = capitalize(farmerTaluka);
+      heading.textContent = `Available Surveyors in ${displayArea}:`;
+      list.innerHTML = `<div style="padding:14px;text-align:center;color:#6b7280;"><i class="fa-solid fa-spinner fa-spin"></i> Searching Atlas DB for active surveyors in ${displayArea}…</div>`;
+      box.classList.add('visible');
+
+      let available = [];
+      try {
+        const res = await AgriConnectAPI.apiGet(`/surveyors?taluka=${encodeURIComponent(farmerTaluka)}&status=available`);
+        if (res && res.success && Array.isArray(res.surveyors)) {
+          available = res.surveyors
+            .filter(s => (s.taluka || '').toLowerCase().trim() === farmerTaluka)
+            .map(s => ({
+              id: s._id,
+              employeeId: s.employeeId,
+              name: s.name,
+              mobile: (s.userId && s.userId.mobile) ? s.userId.mobile : s.mobile || s.employeeId,
+              node: s.baseStation || s.taluka || displayArea,
+              taluka: s.taluka,
+              rating: s.rating || 5.0,
+              jobsCompleted: s.jobsCompleted || 0,
+              status: 'Available'
+            }));
+        }
+      } catch (e) {
+        console.warn('API error fetching surveyors, using local list');
+      }
+
+      // Local fallback ONLY for the matching taluka (never cross-taluka)
+      if (!available.length && db && db.surveyors) {
+        const dbList = Object.values(db.surveyors).filter(s => 
+          (s.status === 'Available' || s.status === 'available') && 
+          (s.taluka || '').toLowerCase().trim() === farmerTaluka
+        );
+        available = dbList.map(s => ({
+          ...s,
+          node: s.node || s.taluka || displayArea
+        }));
+      }
+
+      if (!available.length) {
+        list.innerHTML = `
+          <div class="empty-state" style="padding:26px 16px; text-align:center;">
+            <i class="fa-solid fa-user-slash" style="font-size:32px; color:#9ca3af; margin-bottom:10px; display:block;"></i>
+            <div style="font-size:15px; font-weight:700; color:#1f2937;">No active surveyors currently assigned in ${displayArea}</div>
+            <p style="font-size:12px; color:#6b7280; margin:6px auto 14px; max-width:400px; line-height:1.5;">
+              Each Taluka has a maximum limit of 3 active Surveyors. Once a licensed surveyor applies for <strong>${displayArea}</strong> and is approved by Admin, they will appear here automatically.
+            </p>
+            <a href="apply.html?taluka=${encodeURIComponent(farmerTaluka)}" style="display:inline-flex; align-items:center; gap:6px; font-size:12px; font-weight:700; color:#16a34a; background:#f0fdf4; padding:8px 16px; border-radius:8px; text-decoration:none; border:1px solid #bbf7d0;">
+              <i class="fa-solid fa-file-signature"></i> Surveyor Application Portal
+            </a>
+          </div>`;
+        return;
+      }
+
+      const distResult = db ? db.solveDijkstra(displayArea) : { distances: {} };
+      const distances = (distResult && distResult.distances) ? distResult.distances : (distResult || {});
+
+      const sorted = available.slice().sort((a, b) => {
+        const dA = (distances && typeof distances[a.node] === 'number') ? distances[a.node] : 999;
+        const dB = (distances && typeof distances[b.node] === 'number') ? distances[b.node] : 999;
+        return dA - dB;
+      });
+
+      const hasFarms = farms.length > 0;
+
+      list.innerHTML = sorted.map(s => {
+        const dNum     = (distances && typeof distances[s.node] === 'number' && distances[s.node] !== Infinity) ? distances[s.node] : 0;
+        const starHtml = starDisplay(s.rating);
+        const sIdParam = s.id ? s.id : s.mobile;
+        const btnHtml  = hasFarms
+          ? `<button class="btn-book-blue" onclick="bookSurveyor('${sIdParam}', '${s.mobile}', '${displayArea}', ${dNum}, this)">
+               <i class="fa-solid fa-calendar-plus"></i> Book Now
+             </button>`
+          : `<button class="btn-disabled" disabled title="Register a farm plot first">
+               Register Plot First
+             </button>`;
+
+        return `
+          <div class="surveyor-item-row">
+            <div class="surveyor-item-info">
+              <div class="surveyor-icon-circle"><i class="fa-solid fa-hard-hat"></i></div>
+              <div>
+                <div class="surveyor-name">${s.name} ${s.employeeId ? `(${s.employeeId})` : ''}</div>
+                <div class="surveyor-meta">
+                  <i class="fa-solid fa-mobile-screen" style="margin-right:3px;"></i>${s.mobile}
+                  &nbspbull;&nbsp;
+                  <i class="fa-solid fa-location-dot" style="margin-right:3px;"></i>${s.node || s.taluka}
+                </div>
+                <div class="surveyor-meta">
+                  ${starHtml}
+                  &nbsp;${s.rating} &bull; ${s.jobsCompleted} jobs done
+                  &nbsp;&bull;&nbsp; <span style="color:#22c55e;font-weight:600;">Dedicated to ${displayArea}</span>
+                </div>
+              </div>
+            </div>
+            ${btnHtml}
+          </div>`;
+      }).join('');
+    }
+
+    // ── Book surveyor ─────────────────────────────────────────
+    async function bookSurveyor(sId, sMobile, area, distance, btn) {
+      if (!farms.length) {
+        showPageNotification('Please register a farm plot before booking.', 'error');
+        return;
+      }
+
+      const farm = farms[farms.length - 1];
+      btn.disabled = true;
+      btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Booking…`;
+
+      let createdBooking = null;
+
+      // 1. Try Backend API (Initial booking has NO auto-schedule; surveyor sets date/time upon accept)
+      try {
+        const res = await AgriConnectAPI.apiPost('/bookings', {
+          farmId: (farm.id && farm.id.length === 24) ? farm.id : null,
+          village: area,
+          area: farm.area,
+          surveyType: farm.surveyType || 'Boundary Tally',
+          preferredSurveyorId: (sId && sId.length === 24) ? sId : null
+        });
+
+        if (res && res.success && res.booking) {
+          createdBooking = {
+            id: res.booking._id,
+            farmerMobile: currentUser.mobile,
+            farmerName: currentUser.name,
+            surveyorMobile: sMobile,
+            surveyorName: (res.booking.surveyorId && res.booking.surveyorId.name) ? res.booking.surveyorId.name : 'Assigned Surveyor',
+            farmName: farm.name,
+            surveyType: farm.surveyType || 'Boundary Tally',
+            location: farm.location || area,
+            area: res.booking.area || farm.area,
+            cost: res.booking.cost || Math.ceil(farm.area * 500),
+            distance: res.booking.distance || distance,
+            status: res.booking.status || 'Assigned',
+            paymentStatus: 'Unpaid',
+            appointmentDate: null,
+            appointmentTime: null,
+            scheduleDate: null,
+            scheduleTime: null,
+            instructions: '',
+            createdAt: res.booking.createdAt || new Date().toISOString()
+          };
+        }
+      } catch (err) {
+        console.warn('API error during booking, using local fallback:', err);
+      }
+
+      // 2. Fallback if API was unreachable
+      if (!createdBooking) {
+        const cost = Math.ceil(farm.area * 500);
+        createdBooking = {
+          id: `BK-${Date.now()}`,
+          farmerMobile: currentUser.mobile,
+          farmerName: currentUser.name,
+          surveyorMobile: sMobile,
+          surveyorName: 'Assigned Surveyor',
+          farmName: farm.name,
+          surveyType: farm.surveyType || 'Boundary Tally',
+          location: farm.location,
+          area: farm.area,
+          cost: cost,
+          distance: distance,
+          status: 'Assigned',
+          paymentStatus: 'Unpaid',
+          appointmentDate: null,
+          appointmentTime: null,
+          scheduleDate: null,
+          scheduleTime: null,
+          instructions: '',
+          createdAt: new Date().toISOString()
+        };
+      }
+
+      if (db) {
+        db.bookings.push(createdBooking);
+        if (db.surveyors[sMobile]) db.surveyors[sMobile].status = 'Busy';
+        db.saveState();
+      }
+
+      const box = document.getElementById('surveyor-results-box');
+      if (box) box.classList.remove('visible');
+
+      const strip = document.getElementById('booking-strip');
+      if (strip) {
+        strip.className = 'notification-strip success';
+        strip.innerHTML = `<i class="fa-solid fa-circle-check"></i> Booking request created! Status: <strong>Assigned</strong>. Waiting for surveyor confirmation.`;
+        strip.style.display = 'flex';
+        setTimeout(() => { strip.style.display = 'none'; }, 6000);
+      }
+
+      await renderBookings();
+    }
+
+    // ── Bookings render ───────────────────────────────────────
+    async function renderBookings() {
+      const container = document.getElementById('bookings-container');
+      if (!container) return;
+
+      // Try fetching live bookings from API
+      let myBookings = [];
+      try {
+        const res = await AgriConnectAPI.apiGet('/bookings');
+        if (res && res.success && Array.isArray(res.bookings)) {
+          myBookings = res.bookings.map(b => ({
+            id: b._id,
+            farmerName: b.farmerId ? b.farmerId.name : currentUser.name,
+            farmerMobile: (b.farmerId && b.farmerId.mobile) ? b.farmerId.mobile : currentUser.mobile,
+            surveyorName: b.surveyorId ? b.surveyorId.name : 'Assigned Surveyor',
+            farmName: b.farmId ? b.farmId.farmName : (b.surveyType || 'Plot Survey'),
+            surveyType: b.surveyType || 'Boundary Tally',
+            location: (b.farmId && b.farmId.location && b.farmId.location.address) ? b.farmId.location.address : (b.farmId ? b.farmId.village : 'Local Plot'),
+            area: b.area,
+            cost: b.cost,
+            distance: b.distance,
+            status: b.status,
+            paymentStatus: b.status === 'Paid' ? 'Paid' : 'Unpaid',
+            scheduleDate: b.appointmentDate,
+            scheduleTime: b.appointmentTime,
+            instructions: b.preparationInstructions,
+            report: b.report
+          }));
+        }
+      } catch (e) {
+        console.warn('API error retrieving bookings, using local list');
+      }
+
+      if (!myBookings.length && db) {
+        myBookings = db.bookings.filter(b => b.farmerMobile === currentUser.mobile);
+      }
+
+      if (!myBookings.length) {
+        container.innerHTML = `<div class="empty-state"><i class="fa-solid fa-calendar-xmark"></i>No bookings made yet.</div>`;
+        return;
+      }
+
+      container.innerHTML = myBookings.slice().reverse().map(b => {
+        const statusBadge  = bookingStatusBadge(b.status);
+        const payBadge = b.paymentStatus === 'Paid'
+        ? `<span class="badge-paid">Paid</span>`
+        : `<span class="badge-unpaid">Unpaid</span>`;
+
+        let scheduleHtml = '';
+        if (b.status === 'Assigned') {
+          scheduleHtml = `<div style="margin-top:10px; padding:10px 12px; background:#fefce8; border-left:4px solid #eab308; border-radius:4px;">
+            <div style="font-size:12px; font-weight:700; color:#854d0e;"><i class="fa-regular fa-clock" style="margin-right:5px;"></i>Schedule: Waiting for surveyor confirmation</div>
+            <div style="font-size:11px; color:#a16207; margin-top:3px;">The assigned surveyor will set the appointment date and time.</div>
+          </div>`;
+        } else if (b.scheduleDate || b.appointmentDate) {
+          const sDate = b.scheduleDate || b.appointmentDate;
+          const sTime = b.scheduleTime || b.appointmentTime || '';
+          const timeText = sTime ? ` at ${sTime}` : '';
+          const instText = (b.instructions || b.preparationInstructions)
+            ? `<div style="font-size:12px; color:#15803d; margin-top:4px;"><i class="fa-solid fa-message" style="margin-right:4px;"></i>${b.instructions || b.preparationInstructions}</div>`
+            : '';
+          scheduleHtml = `<div style="margin-top:10px; padding:10px 12px; background:#f0fdf4; border-left:4px solid #22c55e; border-radius:4px;">
+            <div style="font-size:12px; font-weight:700; color:#166534;"><i class="fa-solid fa-calendar-check" style="margin-right:5px;"></i>Scheduled: ${sDate}${timeText}</div>
+            ${instText}
+          </div>`;
+        }
+
+        let actionsHtml = '';
+        if (b.status === 'Completed') {
+          if (b.paymentStatus === 'Unpaid') {
+            actionsHtml += `<button class="btn-dash-green" style="margin-top:12px;width:100%;margin-bottom:8px;" onclick="payBooking('${b.id}')"><i class="fa-solid fa-credit-card" style="margin-right:6px;"></i>Pay ₹${(b.cost||0).toLocaleString('en-IN')}</button>`;
+          }
+          actionsHtml += `<button class="btn-book-blue" style="width:100%;margin-top:8px;" onclick="viewNotice('${b.id}')"><i class="fa-solid fa-certificate" style="margin-right:6px;"></i> View Official Notice</button>`;
+        }
+
+        return `
+          <div class="booking-row">
+            <div class="booking-row-header">
+              <div class="booking-row-title">${b.farmName || 'Survey Job'}</div>
+              <div class="booking-badges">${statusBadge}${payBadge}</div>
+            </div>
+            <div class="booking-row-meta"><i class="fa-solid fa-hard-hat" style="margin-right:4px;color:#22c55e;"></i>Surveyor: <strong>${b.surveyorName}</strong></div>
+            <div class="booking-row-meta"><i class="fa-solid fa-briefcase" style="margin-right:4px;color:#3b82f6;"></i>Task: <strong style="color:#2563eb;">${b.surveyType || 'Boundary Tally'}</strong></div>
+            <div class="booking-row-meta"><i class="fa-solid fa-location-dot" style="margin-right:4px;color:#6b7280;"></i>${b.location}</div>
+            <div class="booking-row-meta">
+              <i class="fa-solid fa-ruler-combined" style="margin-right:4px;color:#6b7280;"></i>${b.area} acres &bull;
+              <span style="font-weight:600;">₹${(b.cost||0).toLocaleString('en-IN')}</span>
+            </div>
+            ${scheduleHtml}
+            ${actionsHtml}
+          </div>`;
+      }).join('');
+    }
+
+    // ── Pay booking ───────────────────────────────────────────
+    async function payBooking(bookingId) {
+      try {
+        const res = await AgriConnectAPI.apiPost(`/bookings/${bookingId}/pay`, { paymentMethod: 'UPI' });
+        if (res && res.success) {
+          showPageNotification(`Payment processed successfully! Invoice #${res.payment?.invoiceNumber || 'INV-PAID'} recorded in Atlas DB.`, 'success');
+        } else {
+          showPageNotification(res?.message || 'Payment processing failed in MongoDB Atlas.', 'error');
+        }
+      } catch (e) {
+        console.warn('API error during payBooking:', e);
+        showPageNotification(`Payment error: ${e.message}`, 'error');
+      }
+
+      await renderBookings();
+    }
+
+    // ── viewNotice ────────────────────────────────────────────
+    function viewNotice(id) {
+      const b = (db ? db.bookings.find(x => x.id === id) : null);
+      if(!b || !b.report) return;
+      
+      const content = document.getElementById('notice-content');
+      content.innerHTML = `
+        <div style="display:flex; justify-content:space-between; margin-bottom:20px; font-size:14px;">
+          <div>
+            <p style="margin:0 0 5px;"><strong>Farmer:</strong> ${b.farmerName}</p>
+            <p style="margin:0 0 5px;"><strong>Farm Name:</strong> ${b.farmName}</p>
+            <p style="margin:0 0 5px;"><strong>Location:</strong> ${b.location}</p>
+          </div>
+          <div style="text-align:right;">
+            <p style="margin:0 0 5px;"><strong>Surveyor:</strong> ${b.surveyorName}</p>
+            <p style="margin:0 0 5px;"><strong>Task:</strong> ${b.surveyType || 'Boundary Tally'}</p>
+            <p style="margin:0 0 5px;"><strong>Estimate Cost:</strong> ₹${(b.cost||0).toLocaleString('en-IN')}</p>
+          </div>
+        </div>
+        
+        <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:15px; margin-bottom:20px;">
+          <h3 style="margin:0 0 10px; font-size:15px; color:#0f172a;"><i class="fa-solid fa-ruler-combined"></i> Verified Field Report</h3>
+          <p style="margin:0 0 5px; font-size:14px;"><strong>Verified Area:</strong> ${b.report.acreage} acres</p>
+          <p style="margin:0 0 5px; font-size:14px;"><strong>GPS Coordinates:</strong> ${b.report.lat}, ${b.report.lng}</p>
+          <p style="margin:0; font-size:14px; margin-top:10px;"><strong>Observations:</strong><br>${b.report.observations}</p>
+        </div>
+        
+        <div>
+          <h3 style="margin:0 0 10px; font-size:15px; color:#0f172a;"><i class="fa-solid fa-map-location-dot"></i> Official Plotted Map</h3>
+          ${b.report.mapImage 
+            ? `<img src="${b.report.mapImage}" style="width:100%; border-radius:8px; border:2px solid #e2e8f0; object-fit:contain;" alt="Survey Map">` 
+            : `<div style="background:#f1f5f9; padding:30px; text-align:center; border-radius:8px; border:2px dashed #cbd5e1; color:#64748b;"><i class="fa-solid fa-image" style="font-size:24px; margin-bottom:10px;"></i><br>Map data not available for legacy surveys.</div>`
+          }
+        </div>
+      `;
+      document.getElementById('notice-sign').innerText = b.surveyorName;
+      document.getElementById('notice-modal').style.display = 'flex';
+    }
+
+    // ── Helpers ───────────────────────────────────────────────
+    function bookingStatusBadge(status) {
+      const map = {
+        'Assigned':  'badge-blue',
+        'Accepted':  'badge-orange',
+        'Completed': 'badge-green',
+        'Declined':  'badge-red',
+      };
+      const cls = map[status] || 'badge-gray';
+      return `<span class="${cls}">${status}</span>`;
+    }
+
+    function starDisplay(rating) {
+      const full  = Math.floor(rating);
+      const empty = 5 - full;
+      return (
+        `<span class="star-row">` +
+        '<i class="fa-solid fa-star star-filled"></i>'.repeat(full) +
+        '<i class="fa-regular fa-star star-empty"></i>'.repeat(empty) +
+        `</span>`
+      );
+    }
+
+    function capitalize(str) {
+      return str ? str.charAt(0).toUpperCase() + str.slice(1) : '';
+    }
+
+    function showPageNotification(msg, type = 'success') {
+      const el = document.getElementById('page-notification');
+      if (!el) return;
+      el.className = `notification-strip ${type}`;
+      el.innerHTML = `<i class="fa-solid fa-${type === 'success' ? 'circle-check' : 'circle-exclamation'}"></i> ${msg}`;
+      el.style.display = 'flex';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      setTimeout(() => { el.style.display = 'none'; }, 5000);
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // HELPLINE CHAT WIDGET
+    // ═══════════════════════════════════════════════════════════
+    let chatOpen = false;
+
+    function toggleChat() {
+      chatOpen = !chatOpen;
+      const win = document.getElementById('chat-window');
+      if (chatOpen) {
+        win.classList.add('open');
+        document.getElementById('chat-input').focus();
+      } else {
+        win.classList.remove('open');
+      }
+    }
+
+    const chatReplies = {
+      'register':   'To register a farm plot, fill in the "Register Farm Plot" form on the right side. Enter farm name, location, area, and press Save. We\'ll calculate the estimated cost instantly!',
+      'farm':       'You can register your farm plots in the "Register Farm Plot" section. Each plot needs a name, village location, and area in acres.',
+      'book':       'To book a surveyor: first register at least one farm plot, then go to "Search & Book Nearest Surveyor", select your area, and click Search. The system uses smart routing to find the nearest available surveyor.',
+      'surveyor':   'Surveyors are licensed professionals who verify your land boundaries. You can find and book the nearest available one from the booking section.',
+      'cost':       'Survey cost is calculated at ₹500 per acre. For example, a 2.5 acre farm costs ₹1,250. Final payment is made only after the survey is completed.',
+      'pay':        'Payment can be made from "My Bookings" once the surveyor marks the job as Completed. Click the "Pay ₹X" button to process your payment.',
+      'status':     'Booking statuses: Assigned (awaiting surveyor), Accepted (surveyor confirmed), Completed (work done), Declined (surveyor unavailable). Check My Bookings for updates.',
+      'help':       'I can help with: registering farms, booking surveyors, understanding costs, payment process, and booking status. What would you like to know?',
+      'hello':      'Hello! Welcome to AgriConnect Support. How can I assist you with your land survey today?',
+      'hi':         'Hi there! How can I help you? Ask me about farm registration, booking a surveyor, or payment.',
+      'price':      'Survey cost is ₹500 per acre. Register your farm plot and we\'ll automatically calculate the estimated cost for you.',
+      'invoice':    'Invoices are generated automatically when you pay for a completed survey. You can find them in the Admin dashboard under Finance & Invoice Log.',
+      'cancel':     'Currently, bookings cannot be cancelled once accepted by a surveyor. Please contact support for assistance.',
+      'contact':    'You can reach AgriConnect support at 1800-XXX-XXXX (toll-free) or email support@agriconnect.in',
+    };
+
+    function sendChatMessage() {
+      const input = document.getElementById('chat-input');
+      const msg   = input.value.trim();
+      if (!msg) return;
+
+      appendChatMsg(msg, 'user');
+      input.value = '';
+
+      setTimeout(() => {
+        const lower = msg.toLowerCase();
+        let reply = "I'm not sure I understood that. Try asking about: farm registration, booking a surveyor, survey cost, or payment process.";
+
+        const keys = Object.keys(chatReplies);
+        for (let k of keys) {
+          if (lower.includes(k)) {
+            reply = chatReplies[k];
+            break;
+          }
+        }
+        appendChatMsg(reply, 'bot');
+      }, 600);
+    }
+
+    function appendChatMsg(text, type) {
+      const container = document.getElementById('chat-messages');
+      const div = document.createElement('div');
+      div.className = `chat-msg ${type}`;
+      div.textContent = text;
+      container.appendChild(div);
+      container.scrollTop = container.scrollHeight;
+    }
+  </script>
+</body>
+</html>

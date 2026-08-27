@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Farmer Registration – AgriConnect</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="shared_styles.css">
+  <style>
+    body { margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; background: #0f1f17; min-height: 100vh; }
+    .reg-page-bg {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1rem;
+      background: radial-gradient(ellipse at top right, rgba(85,197,122,0.15) 0%, transparent 60%),
+                  radial-gradient(ellipse at bottom left, rgba(45,106,79,0.2) 0%, transparent 60%),
+                  #0a1410;
+    }
+    .reg-shell { width: 100%; max-width: 580px; }
+    .back-home {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      color: rgba(255,255,255,0.55);
+      font-size: 0.83rem;
+      font-weight: 600;
+      text-decoration: none;
+      margin-bottom: 1.2rem;
+      transition: color 0.2s;
+    }
+    .back-home:hover { color: #55c57a; }
+    .reg-card {
+      background: rgba(255,255,255,0.04);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 20px;
+      padding: 2.2rem;
+      color: white;
+      box-shadow: 0 24px 60px rgba(0,0,0,0.5);
+    }
+    .reg-brand {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      margin-bottom: 1.4rem;
+    }
+    .reg-brand-icon {
+      width: 38px;
+      height: 38px;
+      background: linear-gradient(135deg,#43936c,#2d6a4f);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      color: white;
+    }
+    .reg-brand-name { font-size: 1rem; font-weight: 700; }
+    .reg-title { font-size: 1.7rem; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 0.3rem; }
+    .reg-sub   { font-size: 0.83rem; color: rgba(255,255,255,0.6); margin-bottom: 1.8rem; }
+    .rf-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    @media (max-width: 520px) { .rf-row { grid-template-columns: 1fr; } }
+    .rf-group { margin-bottom: 1rem; }
+    .rf-group label {
+      display: block;
+      font-size: 0.77rem;
+      font-weight: 700;
+      color: rgba(255,255,255,0.65);
+      margin-bottom: 0.38rem;
+    }
+    .rf-input {
+      width: 100%;
+      padding: 0.7rem 0.9rem;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 9px;
+      color: white;
+      font-size: 0.9rem;
+      font-family: inherit;
+      outline: none;
+      box-sizing: border-box;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .rf-input option { background: #1a2f23; color: white; }
+    .rf-input::placeholder { color: rgba(255,255,255,0.28); }
+    .rf-input:focus { border-color: #55c57a; background: rgba(255,255,255,0.11); }
+    .rf-input.error { border-color: #ff8fa3; }
+    .rf-err { font-size: 0.7rem; color: #ff8fa3; margin-top: 0.2rem; display: none; }
+    .form-section-label {
+      font-size: 0.67rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: rgba(255,255,255,0.3);
+      margin: 1.4rem 0 0.85rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .form-section-label::before,
+    .form-section-label::after { content:''; flex:1; height:1px; background:rgba(255,255,255,0.1); }
+    .btn-reg-submit {
+      width: 100%;
+      padding: 0.85rem;
+      background: linear-gradient(135deg,#55c57a,#3d995e);
+      border: none;
+      border-radius: 10px;
+      color: white;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-top: 1.2rem;
+      transition: opacity 0.2s, transform 0.15s;
+    }
+    .btn-reg-submit:hover { opacity: 0.92; transform: translateY(-1px); }
+    .btn-reg-submit:disabled { opacity: 0.6; cursor: not-allowed; }
+    .reg-footer {
+      text-align: center;
+      margin-top: 1.2rem;
+      font-size: 0.82rem;
+      color: rgba(255,255,255,0.5);
+    }
+    .reg-footer a { color: #55c57a; text-decoration: none; font-weight: 600; }
+    .reg-footer a:hover { text-decoration: underline; }
+    .reg-success {
+      display: none;
+      text-align: center;
+      padding: 2rem 1rem;
+    }
+    .reg-success .s-icon {
+      width: 60px;
+      height: 60px;
+      background: rgba(85,197,122,0.15);
+      border: 2px solid #55c57a;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.8rem;
+      color: #55c57a;
+      margin: 0 auto 1.2rem;
+    }
+    .reg-success h3 { font-size: 1.4rem; font-weight: 800; margin-bottom: 0.4rem; }
+    .reg-success p { font-size: 0.85rem; color: rgba(255,255,255,0.65); margin-bottom: 1.5rem; }
+    .btn-go-login {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.6rem;
+      background: linear-gradient(135deg,#55c57a,#3d995e);
+      border-radius: 9px;
+      color: white;
+      font-weight: 700;
+      font-size: 0.88rem;
+      text-decoration: none;
+      transition: transform 0.15s;
+    }
+    .btn-go-login:hover { transform: translateY(-2px); }
+  </style>
+</head>
+<body>
+<div class="reg-page-bg">
+  <div class="reg-shell">
+
+    <a href="login.html" class="back-home">
+      <i class="fa-solid fa-chevron-left"></i> Back to Login
+    </a>
+
+    <div class="reg-card">
+
+      <div class="reg-brand">
+        <div class="reg-brand-icon"><i class="fa-solid fa-wheat-awn"></i></div>
+        <span class="reg-brand-name">AgriConnect – Farmer Registration</span>
+      </div>
+
+      <!-- Registration form -->
+      <div id="reg-form-section">
+        <h1 class="reg-title">Create Your Account</h1>
+        <p class="reg-sub">Register as a farmer to book certified surveyors and manage your land plots digitally.</p>
+
+        <div id="reg-error-strip" style="display:none; background:rgba(239,68,68,0.18); border:1px solid rgba(239,68,68,0.45); color:#fca5a5; padding:12px 16px; border-radius:9px; font-size:0.88rem; margin-bottom:1.2rem; align-items:center; gap:8px;"></div>
+
+        <form id="reg-form" onsubmit="handleRegister(event)" novalidate>
+
+          <div class="form-section-label">Personal Information</div>
+          <div class="rf-row">
+            <div class="rf-group">
+              <label for="r-name">Full Name *</label>
+              <input type="text" id="r-name" class="rf-input" placeholder="e.g. Rohit Bhamare" required>
+              <div class="rf-err" id="re-name">Enter your full name.</div>
+            </div>
+            <div class="rf-group">
+              <label for="r-mobile">Mobile Number * <small style="color:rgba(255,255,255,0.3)">(used to log in)</small></label>
+              <input type="tel" id="r-mobile" class="rf-input" placeholder="10-digit mobile" maxlength="10" required>
+              <div class="rf-err" id="re-mobile">Enter a valid 10-digit number.</div>
+            </div>
+          </div>
+
+          <div class="rf-group">
+            <label for="r-email">Email Address *</label>
+            <input type="email" id="r-email" class="rf-input" placeholder="rohit@gmail.com" required>
+            <div class="rf-err" id="re-email">Enter a valid email address.</div>
+          </div>
+
+          <div class="form-section-label">Farm Location</div>
+          <div class="rf-row">
+            <div class="rf-group">
+              <label for="r-village">Village / Town *</label>
+              <input type="text" id="r-village" class="rf-input" placeholder="e.g. Thalner" required>
+              <div class="rf-err" id="re-village">Enter your village name.</div>
+            </div>
+            <div class="rf-group">
+              <label for="r-taluka">Taluka *</label>
+              <select id="r-taluka" class="rf-input" required>
+                <option value="">Select taluka</option>
+                <option value="chopda">Chopda</option>
+                <option value="thalner">Thalner</option>
+                <option value="shirpur">Shirpur</option>
+                <option value="jalgaon">Jalgaon</option>
+                <option value="jamner">Jamner</option>
+                <option value="pachora">Pachora</option>
+              </select>
+              <div class="rf-err" id="re-taluka">Select your taluka.</div>
+            </div>
+          </div>
+
+          <div class="form-section-label">Set Password</div>
+          <div class="rf-row">
+            <div class="rf-group">
+              <label for="r-password">Password *</label>
+              <input type="password" id="r-password" class="rf-input" placeholder="Min 6 characters" required>
+              <div class="rf-err" id="re-password">Password must be at least 6 characters.</div>
+            </div>
+            <div class="rf-group">
+              <label for="r-confirm">Confirm Password *</label>
+              <input type="password" id="r-confirm" class="rf-input" placeholder="Repeat password" required>
+              <div class="rf-err" id="re-confirm">Passwords do not match.</div>
+            </div>
+          </div>
+
+          <button type="submit" class="btn-reg-submit" id="reg-btn">
+            <i class="fa-solid fa-user-plus"></i>
+            <span id="reg-btn-txt">Create Farmer Account</span>
+          </button>
+        </form>
+
+        <div class="reg-footer">
+          Already have an account? <a href="login.html">Sign In</a>
+        </div>
+      </div>
+
+      <!-- Success -->
+      <div class="reg-success" id="reg-success-section">
+        <div class="s-icon"><i class="fa-solid fa-circle-check"></i></div>
+        <h3>Account Created!</h3>
+        <p id="reg-success-desc">Your farmer account has been registered in MongoDB Atlas. Your profile and taluka have been saved successfully.</p>
+        <div style="display:flex; flex-direction:column; gap:10px; align-items:center;">
+          <a href="farmer.html" class="btn-go-login" style="width:100%; justify-content:center; box-sizing:border-box;">
+            <i class="fa-solid fa-tractor"></i> Open Farmer Dashboard
+          </a>
+          <a href="login.html" style="font-size:13px; color:#55c57a; text-decoration:none; margin-top:4px;">
+            <i class="fa-solid fa-right-to-bracket"></i> Or Sign In Manually
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="config.js?v=2.2"></script>
+<script src="api.js?v=2.2"></script>
+<script src="shared.js?v=2.2"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', async () => {
+    await loadDynamicTalukas();
+  });
+
+  async function loadDynamicTalukas() {
+    const sel = document.getElementById('r-taluka');
+    if (!sel) return;
+    try {
+      const res = await AgriConnectAPI.apiGet('/talukas');
+      if (res && res.success && Array.isArray(res.talukas) && res.talukas.length > 0) {
+        sel.innerHTML = '<option value="">Select taluka</option>' +
+          res.talukas.map(t => `<option value="${t.name}">${t.displayName || (t.name.charAt(0).toUpperCase() + t.name.slice(1))}</option>`).join('');
+      }
+    } catch (err) {
+      console.warn('Fallback to static talukas in register.html:', err);
+    }
+  }
+
+  function setErr(inputId, errId, isErr, msg) {
+    document.getElementById(inputId).classList.toggle('error', isErr);
+    const e = document.getElementById(errId);
+    if (isErr && msg) e.textContent = msg;
+    e.style.display = isErr ? 'block' : 'none';
+  }
+
+  function showFormError(msg) {
+    const el = document.getElementById('reg-error-strip');
+    if (el) {
+      el.innerHTML = `<i class="fa-solid fa-triangle-exclamation" style="color:#f87171; margin-right:6px; flex-shrink:0;"></i><span>${msg}</span>`;
+      el.style.display = 'flex';
+      el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  }
+
+  function hideFormError() {
+    const el = document.getElementById('reg-error-strip');
+    if (el) el.style.display = 'none';
+  }
+
+  async function handleRegister(e) {
+    e.preventDefault();
+    hideFormError();
+
+    const name     = document.getElementById('r-name').value.trim();
+    const mobile   = document.getElementById('r-mobile').value.trim();
+    const email    = document.getElementById('r-email').value.trim();
+    const village  = document.getElementById('r-village').value.trim();
+    const taluka   = document.getElementById('r-taluka').value;
+    const password = document.getElementById('r-password').value;
+    const confirm  = document.getElementById('r-confirm').value;
+
+    let valid = true;
+    if (!name)                         { setErr('r-name','re-name',true);       valid=false; } else setErr('r-name','re-name',false);
+    if (!/^[0-9]{10}$/.test(mobile))   { setErr('r-mobile','re-mobile',true,'Enter a valid 10-digit mobile.'); valid=false; } else setErr('r-mobile','re-mobile',false);
+    if (!email || !email.includes('@')){ setErr('r-email','re-email',true);     valid=false; } else setErr('r-email','re-email',false);
+    if (!village)                      { setErr('r-village','re-village',true); valid=false; } else setErr('r-village','re-village',false);
+    if (!taluka)                       { setErr('r-taluka','re-taluka',true);   valid=false; } else setErr('r-taluka','re-taluka',false);
+    if (password.length < 6)           { setErr('r-password','re-password',true); valid=false; } else setErr('r-password','re-password',false);
+    if (password !== confirm)          { setErr('r-confirm','re-confirm',true); valid=false; } else setErr('r-confirm','re-confirm',false);
+    if (!valid) return;
+
+    const btn = document.getElementById('reg-btn');
+    const txt = document.getElementById('reg-btn-txt');
+    btn.disabled = true;
+    txt.textContent = 'Saving to MongoDB…';
+
+    const userData = {
+      name,
+      mobile,
+      email,
+      password,
+      village,
+      taluka,
+      role: 'farmer'
+    };
+
+    try {
+      const res = await AgriConnectAPI.apiPost('/auth/register', userData);
+
+      if (res && res.success && res.user) {
+        if (res.token) AgriConnectAPI.setToken(res.token);
+        const savedUser = {
+          ...res.user,
+          role: 'Farmer'
+        };
+        AgriConnectAPI.setCurrentUser(savedUser);
+
+        document.getElementById('reg-form-section').style.display = 'none';
+        document.getElementById('reg-success-section').style.display = 'block';
+      } else {
+        btn.disabled = false;
+        txt.textContent = 'Create Farmer Account';
+        const errMsg = (res && res.message) ? res.message : 'Registration failed in MongoDB Atlas. Mobile or email may already be registered.';
+        showFormError(errMsg);
+      }
+    } catch (err) {
+      btn.disabled = false;
+      txt.textContent = 'Create Farmer Account';
+      showFormError(`Registration error: ${err.message}`);
+    }
+  }
+</script>
+</body>
+</html>

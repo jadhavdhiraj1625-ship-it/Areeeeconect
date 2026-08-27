@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Operations – AgriConnect</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="shared_styles.css">
+  <style>
+    body { margin: 0; font-family: 'Plus Jakarta Sans', sans-serif; background: #f0fdf4; color: #1e293b; }
+    .header { background: #166534; color: white; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+    .header h1 { margin: 0; font-size: 1.5rem; font-family: 'Outfit', sans-serif; }
+    .header p { margin: 0; font-size: 0.85rem; opacity: 0.9; }
+    .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; padding: 1.5rem 2rem 0.5rem; }
+    .stat-card { background: white; padding: 1.2rem; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border-left: 4px solid #166534; font-weight: 600; font-size: 1.1rem; }
+    .panel { background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 1.5rem; }
+    .panel h3 { margin-top: 0; font-family: 'Outfit', sans-serif; color: #166534; border-bottom: 2px solid #bbf7d0; padding-bottom: 0.5rem; }
+    .list-item { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 0; border-bottom: 1px solid #f1f5f9; font-size: 0.9rem; }
+    .btn { background: #166534; color: white; border: none; padding: 0.4rem 0.8rem; border-radius: 4px; cursor: pointer; font-weight: 600; transition: background 0.2s; }
+    .btn:hover { background: #14532d; }
+    .btn.danger { background: #dc2626; }
+    .btn.danger:hover { background: #b91c1c; }
+    .progress { background: #e2e8f0; border-radius: 4px; height: 10px; overflow: hidden; margin-top: 4px; }
+    .progress div { background: #166534; height: 100%; }
+    .filter-bar { display: flex; gap: 8px; align-items: center; margin-bottom: 12px; background: #f8fafc; padding: 8px 12px; border-radius: 6px; font-size: 12px; }
+    .filter-bar select { padding: 4px 8px; border-radius: 4px; border: 1px solid #cbd5e1; font-size: 12px; }
+  </style>
+</head>
+<body class="bg-farm-backdrop">
+  <header class="header">
+    <div>
+      <div style="display:flex; align-items:center; gap: 12px;">
+        <h1>AgriConnect – Operations Admin Control</h1>
+        <span id="db-status-badge" style="padding: 3px 10px; border-radius: 99px; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; gap: 5px; background: #15803d; color: #fff;">
+          <i class="fa-solid fa-circle-check" style="color: #4ade80;"></i> Atlas DB: <strong>Connected</strong>
+        </span>
+      </div>
+      <p>Back-office Operations, Dynamic Taluka Governance &amp; Candidate Pipeline</p>
+    </div>
+    <div style="display:flex; gap: 10px; align-items:center;">
+      <a href="index.html" class="btn" style="text-decoration:none; background: rgba(255,255,255,0.2);"><i class="fa-solid fa-house"></i> Home</a>
+      <a href="farmer.html" class="btn" style="text-decoration:none; background: rgba(255,255,255,0.2);"><i class="fa-solid fa-tractor"></i> Farmer</a>
+      <a href="surveyor.html" class="btn" style="text-decoration:none; background: rgba(255,255,255,0.2);"><i class="fa-solid fa-compass-drafting"></i> Surveyor</a>
+      <button class="btn danger" onclick="AgriConnectAuth.logout()"><i class="fa-solid fa-arrow-right-from-bracket"></i> Logout</button>
+    </div>
+  </header>
+
+  <section class="stats-row">
+    <div class="stat-card"><i class="fa-solid fa-users"></i> <span id="total-candidates">0</span> Total Applicants</div>
+    <div class="stat-card"><i class="fa-solid fa-user-check"></i> <span id="applied-count">0</span> Applied</div>
+    <div class="stat-card"><i class="fa-solid fa-hourglass-half"></i> <span id="interview-pending-count">0</span> Interview / Review</div>
+    <div class="stat-card"><i class="fa-solid fa-user-tie"></i> <span id="active-surveyor-count">0</span> Active Surveyors</div>
+  </section>
+
+  <div class="grid" style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;padding: 1.5rem 2rem;">
+    <!-- LEFT COLUMN -->
+    <div>
+      <div class="panel" id="phase2-card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;">
+          <h3 style="margin:0;">Phase 2 – Document Verification</h3>
+          <div class="filter-bar" style="margin:0;padding:2px 6px;">
+            <label>Taluka:</label>
+            <select id="doc-taluka-filter" onchange="renderDocVerification()">
+              <option value="">All Talukas</option>
+            </select>
+          </div>
+        </div>
+        <div id="doc-verify-list"></div>
+        <p id="doc-empty" style="display:none;color:#6b7280;font-size:13px;">No pending verification requests.</p>
+      </div>
+
+      <div class="panel" id="phase3-card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;">
+          <h3 style="margin:0;">Phase 3 &amp; 4 – Interview &amp; Decision</h3>
+          <div class="filter-bar" style="margin:0;padding:2px 6px;">
+            <label>Taluka:</label>
+            <select id="interview-taluka-filter" onchange="renderInterviews()">
+              <option value="">All Talukas</option>
+            </select>
+          </div>
+        </div>
+        <div id="interview-list"></div>
+        <p id="interview-empty" style="display:none;color:#6b7280;font-size:13px;">No candidates pending interview.</p>
+      </div>
+    </div>
+
+    <!-- RIGHT COLUMN -->
+    <div>
+      <div class="panel" id="taluka-allocation-card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;flex-wrap:wrap;gap:6px;">
+          <h3 style="margin:0;">Taluka Allocation &amp; Dynamic Capacity</h3>
+          <div style="display:flex;gap:6px;">
+            <button class="btn" onclick="openAddTalukaModal()" style="font-size:12px;padding:4px 10px;background:#15803d;"><i class="fa-solid fa-map-location-dot"></i> + New Taluka</button>
+            <button class="btn" onclick="openAddSurveyorModal()" style="font-size:12px;padding:4px 10px;"><i class="fa-solid fa-plus"></i> Add Surveyor</button>
+          </div>
+        </div>
+        <div id="taluka-list"></div>
+        <p id="waiting-empty" style="display:none;color:#6b7280;font-size:13px;">No waiting list candidates.</p>
+      </div>
+
+      <div class="panel" id="finance-card">
+        <h3>Finance &amp; Invoice Log</h3>
+        <div>Total Invoices: <span id="invoice-count">0</span></div>
+        <div>Total Revenue: ₹<span id="total-revenue">0</span></div>
+        <div id="invoice-list" style="max-height:150px;overflow:auto;margin-top:0.5rem;"></div>
+        <p id="invoice-empty" style="display:none;color:#6b7280;font-size:13px;">No transactions recorded.</p>
+      </div>
+
+      <div class="panel" id="bookings-card">
+        <h3>All Bookings Log</h3>
+        <div id="booking-list"></div>
+        <p id="booking-empty" style="display:none;color:#6b7280;font-size:13px;">No bookings yet.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Taluka Modal -->
+  <div id="add-taluka-modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center;">
+    <div style="background:#fff;padding:24px;border-radius:10px;max-width:440px;width:90%;box-shadow:0 20px 25px -5px rgba(0,0,0,0.25);">
+      <h3 style="margin-top:0;color:#166534;"><i class="fa-solid fa-map-location-dot"></i> Create Dynamic Taluka in MongoDB</h3>
+      <p style="font-size:12px;color:#6b7280;margin:0 0 12px;">The talukas collection in MongoDB Atlas is the authoritative source. New Talukas immediately become available across all portals without code changes.</p>
+      <div id="add-taluka-msg" style="display:none;padding:8px;border-radius:4px;font-size:12px;margin-bottom:10px;"></div>
+      <form id="add-taluka-form" onsubmit="handleCreateTaluka(event)">
+        <div style="margin-bottom:10px;">
+          <label style="font-size:12px;font-weight:600;display:block;">Taluka Name *</label>
+          <input type="text" id="nt-name" required style="width:100%;padding:7px;box-sizing:border-box;border:1px solid #ccc;border-radius:4px;" placeholder="e.g. Sambhajinagar" />
+        </div>
+        <div style="margin-bottom:10px;">
+          <label style="font-size:12px;font-weight:600;display:block;">Graph Node / Center Hub</label>
+          <input type="text" id="nt-node" style="width:100%;padding:7px;box-sizing:border-box;border:1px solid #ccc;border-radius:4px;" placeholder="e.g. Sambhajinagar" />
+        </div>
+        <div style="margin-bottom:12px;">
+          <label style="font-size:12px;font-weight:600;display:block;">Active Capacity Limit (Default 3)</label>
+          <input type="number" id="nt-capacity" value="3" min="1" max="10" required style="width:100%;padding:7px;box-sizing:border-box;border:1px solid #ccc;border-radius:4px;" />
+        </div>
+        <div style="display:flex;justify-content:flex-end;gap:8px;">
+          <button type="button" class="btn danger" onclick="document.getElementById('add-taluka-modal').style.display='none'">Cancel</button>
+          <button type="submit" class="btn" id="nt-submit-btn"><i class="fa-solid fa-cloud-arrow-up"></i> Create Taluka</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Add Surveyor Modal -->
+  <div id="add-surveyor-modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center;">
+    <div style="background:#fff;padding:24px;border-radius:8px;max-width:450px;width:90%;box-shadow:0 20px 25px -5px rgba(0,0,0,0.2);">
+      <h3 style="margin-top:0;color:#166534;"><i class="fa-solid fa-user-plus"></i> Add Surveyor to Atlas DB</h3>
+      <div id="add-surv-msg" style="display:none;padding:6px;border-radius:4px;font-size:12px;margin-bottom:8px;"></div>
+      <form id="add-surveyor-form" onsubmit="handleCreateSurveyor(event)">
+        <div style="margin-bottom:8px;">
+          <label style="font-size:12px;font-weight:600;display:block;">Surveyor Name</label>
+          <input type="text" id="ns-name" required style="width:100%;padding:6px;box-sizing:border-box;border:1px solid #ccc;border-radius:4px;" placeholder="e.g. Dhiraj Jadhav" />
+        </div>
+        <div style="margin-bottom:8px;">
+          <label style="font-size:12px;font-weight:600;display:block;">Mobile (Login ID)</label>
+          <input type="text" id="ns-mobile" required style="width:100%;padding:6px;box-sizing:border-box;border:1px solid #ccc;border-radius:4px;" placeholder="e.g. 9822114455" />
+        </div>
+        <div style="margin-bottom:8px;">
+          <label style="font-size:12px;font-weight:600;display:block;">Employee ID</label>
+          <input type="text" id="ns-empid" required style="width:100%;padding:6px;box-sizing:border-box;border:1px solid #ccc;border-radius:4px;" placeholder="e.g. AGR-2026-004" />
+        </div>
+        <div style="margin-bottom:8px;">
+          <label style="font-size:12px;font-weight:600;display:block;">Password</label>
+          <input type="password" id="ns-password" value="password123" required style="width:100%;padding:6px;box-sizing:border-box;border:1px solid #ccc;border-radius:4px;" />
+        </div>
+        <div style="margin-bottom:12px;display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          <div>
+            <label style="font-size:12px;font-weight:600;display:block;">Taluka</label>
+            <select id="ns-taluka" onchange="document.getElementById('ns-base').value = this.options[this.selectedIndex].text" style="width:100%;padding:6px;border:1px solid #ccc;border-radius:4px;">
+              <option value="chopda">Chopda</option>
+              <option value="thalner">Thalner</option>
+              <option value="shirpur">Shirpur</option>
+              <option value="jalgaon">Jalgaon</option>
+              <option value="jamner">Jamner</option>
+              <option value="pachora">Pachora</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size:12px;font-weight:600;display:block;">Base Station</label>
+            <input type="text" id="ns-base" value="Chopda" placeholder="e.g. Shirpur" style="width:100%;padding:6px;box-sizing:border-box;border:1px solid #ccc;border-radius:4px;" />
+          </div>
+        </div>
+        <div style="display:flex;justify-content:flex-end;gap:8px;">
+          <button type="button" class="btn danger" onclick="document.getElementById('add-surveyor-modal').style.display='none'">Cancel</button>
+          <button type="submit" class="btn" id="ns-submit-btn"><i class="fa-solid fa-cloud-arrow-up"></i> Save to Atlas</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="config.js?v=2.2"></script>
+  <script src="api.js?v=2.2"></script>
+  <script src="shared.js?v=2.2"></script>
+  <script>
+    let dynamicTalukas = [];
+
+    document.addEventListener("DOMContentLoaded", async () => {
+      const user = AgriConnectAuth.checkSession('Admin');
+      if (!user) return;
+      if (!window.AgriDB) window.AgriDB = new AgriConnectDB();
+      updateDbStatusBadge();
+      await loadDynamicTalukas();
+      await renderAll();
+    });
+
+    async function loadDynamicTalukas() {
+      try {
+        const res = await AgriConnectAPI.apiGet('/talukas');
+        if (res && res.success && Array.isArray(res.talukas) && res.talukas.length > 0) {
+          dynamicTalukas = res.talukas;
+
+          // Populate doc filter and interview filter
+          const docFilter = document.getElementById('doc-taluka-filter');
+          const intFilter = document.getElementById('interview-taluka-filter');
+          const nsTaluka = document.getElementById('ns-taluka');
+
+          const optionsHtml = '<option value="">All Talukas</option>' +
+            dynamicTalukas.map(t => `<option value="${t.name}">${t.displayName || t.name}</option>`).join('');
+
+          if (docFilter) docFilter.innerHTML = optionsHtml;
+          if (intFilter) intFilter.innerHTML = optionsHtml;
+
+          if (nsTaluka) {
+            nsTaluka.innerHTML = dynamicTalukas.map(t => `<option value="${t.name}">${t.displayName || t.name}</option>`).join('');
+          }
+        }
+      } catch (err) {
+        console.warn('Error loading dynamic talukas in admin:', err);
+      }
+    }
+
+    async function updateDbStatusBadge() {
+      const badge = document.getElementById('db-status-badge');
+      if (!badge) return;
+      try {
+        const res = await AgriConnectAPI.apiGet('/health');
+        if (res && res.success) {
+          badge.innerHTML = '<i class="fa-solid fa-circle-check" style="color:#4ade80;"></i> Atlas DB: <strong>Connected</strong>';
+          badge.style.background = '#15803d';
+          badge.style.color = '#fff';
+        } else {
+          badge.innerHTML = '<i class="fa-solid fa-triangle-exclamation" style="color:#fde047;"></i> Local Mode (Server Offline)';
+          badge.style.background = '#854d0e';
+          badge.style.color = '#fff';
+        }
+      } catch (e) {
+        badge.innerHTML = '<i class="fa-solid fa-triangle-exclamation" style="color:#fde047;"></i> Local Mode (Server Offline)';
+        badge.style.background = '#854d0e';
+        badge.style.color = '#fff';
+      }
+    }
+
+    async function renderAll() {
+      await Promise.all([
+        renderStats(),
+        renderDocVerification(),
+        renderInterviews(),
+        renderTalukaAllocation(),
+        renderFinance(),
+        renderBookings()
+      ]);
+    }
+
+    async function renderStats() {
+      try {
+        const res = await AgriConnectAPI.apiGet('/admin/dashboard');
+        if (res && res.success && res.dashboard) {
+          const d = res.dashboard;
+          document.getElementById('total-candidates').textContent = d.totalCandidates;
+          document.getElementById('applied-count').textContent = d.pendingCandidates;
+          document.getElementById('interview-pending-count').textContent = d.pendingCandidates;
+          document.getElementById('active-surveyor-count').textContent = d.totalSurveyors;
+          return;
+        }
+      } catch (e) {
+        console.warn('Using local stats fallback');
+      }
+
+      const db = window.AgriDB || new AgriConnectDB();
+      const candList = Array.isArray(db.candidates) ? db.candidates : Object.values(db.candidates);
+      const survList = Array.isArray(db.surveyors) ? db.surveyors : Object.values(db.surveyors);
+      document.getElementById('total-candidates').textContent = candList.length;
+      document.getElementById('applied-count').textContent = candList.filter(c => c.status === 'Applied' || c.status === 'applied' || c.status === 'Submitted').length;
+      document.getElementById('interview-pending-count').textContent = candList.filter(c => c.status === 'Interview Pending' || c.status === 'interview' || c.status === 'Document Verification' || c.status === 'shortlisted').length;
+      document.getElementById('active-surveyor-count').textContent = survList.filter(s => s.status === 'Available' || s.status === 'available' || s.status === 'Busy' || s.status === 'assigned').length;
+    }
+
+    async function renderDocVerification() {
+      const listEl = document.getElementById('doc-verify-list');
+      const emptyEl = document.getElementById('doc-empty');
+      const filterTaluka = document.getElementById('doc-taluka-filter') ? document.getElementById('doc-taluka-filter').value : '';
+      listEl.innerHTML = '';
+
+      let pending = [];
+      try {
+        let url = '/admin/candidates?status=applied';
+        if (filterTaluka) url += `&taluka=${encodeURIComponent(filterTaluka)}`;
+        const res = await AgriConnectAPI.apiGet(url);
+        if (res && res.success && Array.isArray(res.candidates)) {
+          pending = res.candidates.map(c => ({
+            id: c._id,
+            name: c.fullName,
+            mobile: c.mobile,
+            qualification: c.qualification,
+            experience: c.experienceYears,
+            taluka: c.preferredTaluka,
+            status: c.applicationStatus
+          }));
+        }
+      } catch (e) {
+        console.warn('Using local candidates for verification');
+      }
+
+      if (!pending.length) {
+        const candList = Array.isArray(window.AgriDB.candidates) ? window.AgriDB.candidates : Object.values(window.AgriDB.candidates);
+        pending = candList.filter(c => (c.status === 'Applied' || c.status === 'applied' || c.status === 'Submitted'));
+        if (filterTaluka) {
+          pending = pending.filter(c => String(c.taluka || '').toLowerCase() === filterTaluka.toLowerCase());
+        }
+      }
+
+      if (pending.length === 0) {
+        emptyEl.style.display = 'block';
+        return;
+      }
+      emptyEl.style.display = 'none';
+
+      pending.forEach(c => {
+        const div = document.createElement('div');
+        div.className = 'list-item';
+        div.innerHTML = `<span><strong>${c.name}</strong> (${c.mobile}) - ${c.qualification || 'Civil Eng'}, ${c.experience || 0}y, <strong>${c.taluka ? c.taluka.toUpperCase() : ''}</strong></span>
+          <span><button class='btn' onclick="verifyCandidate('${c.id}',true)"><i class="fa-solid fa-check"></i> Approve</button> <button class='btn danger' onclick="verifyCandidate('${c.id}',false)"><i class="fa-solid fa-xmark"></i> Reject</button></span>`;
+        listEl.appendChild(div);
+      });
+    }
+
+    async function renderInterviews() {
+      const listEl = document.getElementById('interview-list');
+      const emptyEl = document.getElementById('interview-empty');
+      const filterTaluka = document.getElementById('interview-taluka-filter') ? document.getElementById('interview-taluka-filter').value : '';
+      listEl.innerHTML = '';
+
+      let pending = [];
+      try {
+        let url = '/admin/candidates?status=interview';
+        if (filterTaluka) url += `&taluka=${encodeURIComponent(filterTaluka)}`;
+        const res = await AgriConnectAPI.apiGet(url);
+        if (res && res.success && Array.isArray(res.candidates)) {
+          pending = res.candidates.map(c => ({
+            id: c._id,
+            name: c.fullName,
+            mobile: c.mobile,
+            qualification: c.qualification,
+            experience: c.experienceYears,
+            taluka: c.preferredTaluka,
+            status: c.applicationStatus
+          }));
+        }
+      } catch (e) {
+        console.warn('Using local candidates for interviews');
+      }
+
+      if (!pending.length) {
+        const candList = Array.isArray(window.AgriDB.candidates) ? window.AgriDB.candidates : Object.values(window.AgriDB.candidates);
+        pending = candList.filter(c => (c.status === 'Interview Pending' || c.status === 'interview' || c.status === 'Document Verification' || c.status === 'shortlisted' || c.status === 'test_passed'));
+        if (filterTaluka) {
+          pending = pending.filter(c => String(c.taluka || '').toLowerCase() === filterTaluka.toLowerCase());
+        }
+      }
+
+      if (pending.length === 0) {
+        emptyEl.style.display = 'block';
+        return;
+      }
+      emptyEl.style.display = 'none';
+
+      pending.forEach(c => {
+        const container = document.createElement('div');
+        container.className = 'list-item';
+        container.style.flexDirection = 'column';
+        container.style.alignItems = 'flex-start';
+        container.style.gap = '6px';
+        container.innerHTML = `
+          <div><strong>${c.name}</strong> (${c.mobile}) · <em>${c.qualification || 'Surveying'}</em> · <span style="background:#e0f2fe;color:#0369a1;padding:1px 6px;border-radius:4px;font-size:11px;font-weight:700;">${c.taluka ? c.taluka.toUpperCase() : ''}</span></div>
+          <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+            <label style="font-size:12px;">Score: <input type='number' id='score-${c.id}' min='0' max='100' value='85' style='width:60px;padding:3px;'/></label>
+            <label style="font-size:12px;">Background: <select id='bg-${c.id}' style="padding:3px;"><option value='Passed'>Passed</option><option value='Failed'>Failed</option></select></label>
+            <button class='btn' onclick="recordInterview('${c.id}')"><i class="fa-solid fa-user-check"></i> Submit Decision</button>
+          </div>`;
+        listEl.appendChild(container);
+      });
+    }
+
+    async function renderTalukaAllocation() {
+      const container = document.getElementById('taluka-list');
+      container.innerHTML = '';
+
+      let talukaList = [];
+      try {
+        const res = await AgriConnectAPI.apiGet('/talukas');
+        if (res && res.success && Array.isArray(res.talukas) && res.talukas.length > 0) {
+          talukaList = res.talukas;
+        }
+      } catch (e) {}
+
+      if (!talukaList.length) {
+        talukaList = talukas.map(t => ({
+          name: t.name,
+          displayName: t.name.charAt(0).toUpperCase() + t.name.slice(1),
+          maxCapacity: 3,
+          activeSurveyors: 0,
+          waitingCount: 0
+        }));
+      }
+
+      talukaList.forEach(t => {
+        const div = document.createElement('div');
+        div.className = 'panel';
+        div.style.marginBottom = '0.6rem';
+        const maxCap = t.maxCapacity || 3;
+        const activeCount = t.activeSurveyors || 0;
+        const percent = Math.min(100, Math.round((activeCount / maxCap) * 100));
+        
+        let waitHtml = '';
+        if (t.waitingCount > 0) {
+          waitHtml = `<div style="margin-top:6px;font-size:12px;color:#b45309;font-weight:600;"><i class="fa-solid fa-hourglass-half"></i> FIFO Waiting Queue: ${t.waitingCount} candidate(s)</div>`;
+        } else {
+          waitHtml = `<p style="font-size:12px;color:#6b7280;margin:4px 0 0;">No waiting list candidates.</p>`;
+        }
+
+        div.innerHTML = `
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <strong>${(t.displayName || t.name).toUpperCase()}</strong> 
+            <span style="font-weight:700; color:${activeCount >= maxCap ? '#dc2626' : '#15803d'};">
+              ${activeCount} / ${maxCap} active ${activeCount >= maxCap ? '(FULL)' : ''}
+            </span>
+          </div>
+          <div class='progress' style="margin-top:6px;"><div style='width:${percent}%; background:${activeCount >= maxCap ? '#ef4444' : '#22c55e'};'></div></div>
+          ${waitHtml}
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    async function renderFinance() {
+      const list = document.getElementById('invoice-list');
+      list.innerHTML = '';
+      const emptyEl = document.getElementById('invoice-empty');
+
+      try {
+        const res = await AgriConnectAPI.apiGet('/admin/payments');
+        if (res && res.success && Array.isArray(res.payments)) {
+          const count = res.payments.length;
+          const rev = res.totalRevenue || 0;
+          document.getElementById('invoice-count').textContent = count;
+          document.getElementById('total-revenue').textContent = rev.toLocaleString('en-IN');
+
+          if (count === 0) {
+            emptyEl.style.display = 'block';
+            return;
+          }
+          emptyEl.style.display = 'none';
+          res.payments.forEach(p => {
+            const div = document.createElement('div');
+            div.style.padding = '6px 0';
+            div.style.borderBottom = '1px solid #f3f4f6';
+            div.style.fontSize = '12px';
+            const fName = p.farmerId ? p.farmerId.name : 'Farmer';
+            const dt = p.createdAt ? new Date(p.createdAt).toLocaleDateString('en-IN') : 'Recent';
+            div.innerHTML = `<strong>${p.invoiceNumber}</strong> – ${fName} – <span style="font-weight:700;color:#16a34a;">₹${(p.amount||0).toLocaleString('en-IN')}</span> <small style="color:#6b7280;">(${p.paymentMethod || 'Online'} · ${dt})</small>`;
+            list.appendChild(div);
+          });
+          return;
+        }
+      } catch (e) {
+        console.warn('API error during renderFinance:', e);
+      }
+
+      const db = window.AgriDB || new AgriConnectDB();
+      document.getElementById('invoice-count').textContent = db.invoices ? db.invoices.length : 0;
+      document.getElementById('total-revenue').textContent = (db.revenue || 0).toLocaleString('en-IN');
+      if (!db.invoices || db.invoices.length === 0) {
+        emptyEl.style.display = 'block';
+        return;
+      }
+      emptyEl.style.display = 'none';
+      db.invoices.forEach(inv => {
+        const div = document.createElement('div');
+        div.style.padding = '4px 0';
+        div.style.borderBottom = '1px solid #f3f4f6';
+        div.style.fontSize = '12px';
+        div.textContent = `${inv.id} – ${inv.farmerName} – ₹${(inv.amount || 0).toLocaleString('en-IN')} – ${inv.date}`;
+        list.appendChild(div);
+      });
+    }
+
+    async function renderBookings() {
+      const list = document.getElementById('booking-list');
+      list.innerHTML = '';
+      const emptyEl = document.getElementById('booking-empty');
+
+      let bookings = [];
+      try {
+        const res = await AgriConnectAPI.apiGet('/admin/bookings');
+        if (res && res.success && Array.isArray(res.bookings)) {
+          bookings = res.bookings.map(b => ({
+            farmerName: b.farmerId ? b.farmerId.name : 'Farmer',
+            surveyorName: b.surveyorId ? b.surveyorId.name : 'Assigned Surveyor',
+            area: b.area,
+            cost: b.cost,
+            status: b.status
+          }));
+        }
+      } catch (e) {}
+
+      if (!bookings.length) {
+        const db = window.AgriDB || new AgriConnectDB();
+        bookings = db.bookings || [];
+      }
+
+      if (!bookings || bookings.length === 0) {
+        emptyEl.style.display = 'block';
+        return;
+      }
+      emptyEl.style.display = 'none';
+      bookings.forEach(b => {
+        const div = document.createElement('div');
+        div.className = 'list-item';
+        div.innerHTML = `<span><strong>${b.farmerName}</strong> ➔ <strong>${b.surveyorName}</strong> (${b.area} acres · ₹${(b.cost || b.amount || 0).toLocaleString('en-IN')})</span> <span style="background:#e0f2fe;color:#0369a1;padding:2px 8px;border-radius:99px;font-size:11px;font-weight:700;">${b.status}</span>`;
+        list.appendChild(div);
+      });
+    }
+
+    async function verifyCandidate(id, approve) {
+      try {
+        await AgriConnectAPI.apiPut(`/admin/candidates/${id}`, {
+          applicationStatus: approve ? 'interview' : 'rejected'
+        });
+      } catch (e) {
+        console.warn('API error during verifyCandidate:', e);
+      }
+
+      const db = window.AgriDB || new AgriConnectDB();
+      const candList = Array.isArray(db.candidates) ? db.candidates : Object.values(db.candidates);
+      const cand = candList.find(c => c.id === id || c._id === id);
+      if (cand) {
+        cand.status = approve ? 'Interview Pending' : 'Rejected';
+        db.saveState();
+      }
+      await renderAll();
+    }
+
+    async function recordInterview(id) {
+      const scoreEl = document.getElementById(`score-${id}`);
+      const bgEl = document.getElementById(`bg-${id}`);
+      const score = scoreEl ? Number(scoreEl.value) : 85;
+      const bg = bgEl ? bgEl.value : 'Passed';
+      const empId = `AGR-2026-${String(Math.floor(Math.random()*900)+100)}`;
+
+      try {
+        await AgriConnectAPI.apiPut(`/admin/candidates/${id}`, {
+          applicationStatus: bg === 'Failed' ? 'rejected' : 'selected',
+          interviewScore: score,
+          backgroundCheck: { status: bg.toLowerCase() },
+          employeeId: bg === 'Failed' ? null : empId
+        });
+      } catch (e) {
+        console.warn('API error during recordInterview:', e);
+      }
+
+      const db = window.AgriDB || new AgriConnectDB();
+      const candList = Array.isArray(db.candidates) ? db.candidates : Object.values(db.candidates);
+      const cand = candList.find(c => c.id === id || c._id === id);
+      if (cand) {
+        cand.interviewScore = score;
+        if (bg === 'Failed' || score < 75) {
+          cand.status = (bg === 'Failed') ? 'BG Failed' : 'Rejected';
+        } else {
+          cand.status = 'Surveyor Account Activated';
+          cand.employeeId = empId;
+          const candTaluka = (cand.preferredTaluka || cand.taluka || 'thalner').toLowerCase().trim();
+          db.surveyors[cand.mobile || empId] = {
+            id: empId,
+            emp_id: empId,
+            employeeId: empId,
+            mobile: cand.mobile,
+            name: cand.fullName || cand.name,
+            email: cand.email,
+            taluka: candTaluka,
+            rating: 5.0,
+            jobsCompleted: 0,
+            status: 'Available',
+            node: cand.node || candTaluka.charAt(0).toUpperCase() + candTaluka.slice(1)
+          };
+        }
+        db.saveState();
+      }
+      await renderAll();
+    }
+
+    function openAddTalukaModal() {
+      const modal = document.getElementById('add-taluka-modal');
+      const msg = document.getElementById('add-taluka-msg');
+      if (msg) msg.style.display = 'none';
+      if (modal) modal.style.display = 'flex';
+    }
+
+    async function handleCreateTaluka(e) {
+      e.preventDefault();
+      const name = document.getElementById('nt-name').value.trim();
+      const node = document.getElementById('nt-node').value.trim();
+      const capacity = document.getElementById('nt-capacity').value;
+      const btn = document.getElementById('nt-submit-btn');
+      const msg = document.getElementById('add-taluka-msg');
+
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Creating in Atlas…';
+
+      try {
+        const res = await AgriConnectAPI.apiPost('/talukas', {
+          name,
+          displayName: name.charAt(0).toUpperCase() + name.slice(1),
+          node: node || name,
+          maxCapacity: Number(capacity) || 3
+        });
+
+        if (res && res.success) {
+          msg.style.display = 'block';
+          msg.style.background = '#dcfce7';
+          msg.style.color = '#166534';
+          msg.innerHTML = `<i class="fa-solid fa-circle-check"></i> Taluka <strong>${name}</strong> successfully created in MongoDB!`;
+
+          setTimeout(async () => {
+            document.getElementById('add-taluka-modal').style.display = 'none';
+            document.getElementById('add-taluka-form').reset();
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> Create Taluka';
+            await loadDynamicTalukas();
+            await renderTalukaAllocation();
+          }, 1200);
+        } else {
+          msg.style.display = 'block';
+          msg.style.background = '#fee2e2';
+          msg.style.color = '#991b1b';
+          msg.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i> ${(res && res.message) ? res.message : 'Error creating Taluka'}`;
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> Create Taluka';
+        }
+      } catch (err) {
+        msg.style.display = 'block';
+        msg.style.background = '#fee2e2';
+        msg.style.color = '#991b1b';
+        msg.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i> Network error: ${err.message}`;
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> Create Taluka';
+      }
+    }
+
+    function openAddSurveyorModal() {
+      const modal = document.getElementById('add-surveyor-modal');
+      const msg = document.getElementById('add-surv-msg');
+      if (msg) msg.style.display = 'none';
+      if (modal) modal.style.display = 'flex';
+    }
+
+    async function handleCreateSurveyor(e) {
+      e.preventDefault();
+      const name = document.getElementById('ns-name').value.trim();
+      const mobile = document.getElementById('ns-mobile').value.trim();
+      const employeeId = document.getElementById('ns-empid').value.trim();
+      const password = document.getElementById('ns-password').value;
+      const taluka = document.getElementById('ns-taluka').value;
+      const baseStation = document.getElementById('ns-base').value.trim();
+      const btn = document.getElementById('ns-submit-btn');
+      const msg = document.getElementById('add-surv-msg');
+
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving to Atlas…';
+
+      try {
+        const res = await AgriConnectAPI.apiPost('/surveyors', {
+          name,
+          mobile,
+          employeeId,
+          password,
+          taluka,
+          baseStation,
+          status: 'available',
+          rating: 5.0
+        });
+
+        if (res && res.success) {
+          msg.style.display = 'block';
+          msg.style.background = '#dcfce7';
+          msg.style.color = '#166534';
+          msg.innerHTML = `<i class="fa-solid fa-circle-check"></i> Surveyor <strong>${name}</strong> (${employeeId}) saved to MongoDB Atlas!`;
+
+          setTimeout(async () => {
+            document.getElementById('add-surveyor-modal').style.display = 'none';
+            document.getElementById('add-surveyor-form').reset();
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> Save to Atlas';
+            await renderAll();
+          }, 1200);
+        } else {
+          msg.style.display = 'block';
+          msg.style.background = '#fee2e2';
+          msg.style.color = '#991b1b';
+          msg.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i> ${(res && res.message) ? res.message : 'Error creating surveyor in Atlas'}`;
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> Save to Atlas';
+        }
+      } catch (err) {
+        msg.style.display = 'block';
+        msg.style.background = '#fee2e2';
+        msg.style.color = '#991b1b';
+        msg.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i> Network error: ${err.message}`;
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> Save to Atlas';
+      }
+    }
+  </script>
+</body>
+</html>

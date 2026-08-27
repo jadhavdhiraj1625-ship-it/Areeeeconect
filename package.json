@@ -1,0 +1,14 @@
+{
+  "name": "agriconnect",
+  "version": "1.0.0",
+  "description": "AgriConnect Full-Stack Application",
+  "main": "start.js",
+  "scripts": {
+    "start": "node backend/server.js",
+    "build": "cd backend && npm install",
+    "postinstall": "cd backend && npm install"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AgriConnect - India's Digital Land Survey Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="shared_styles.css">
+  <style>
+    /* ── Recruitment Section ── */
+    .recruitment-section {
+      background: linear-gradient(135deg, #0f2718 0%, #1a4a2e 60%, #0e2016 100%);
+      padding: 5rem 6rem 6rem;
+      position: relative;
+      z-index: 2;
+    }
+
+    .rec-section-header {
+      text-align: center;
+      margin-bottom: 3.5rem;
+    }
+
+    .rec-section-header .eyebrow {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #55c57a;
+      margin-bottom: 0.8rem;
+    }
+
+    .rec-section-header h2 {
+      font-size: 2.6rem;
+      font-weight: 800;
+      color: white;
+      letter-spacing: -0.5px;
+      line-height: 1.15;
+      margin-bottom: 1rem;
+    }
+
+    .rec-section-header p {
+      font-size: 1rem;
+      color: rgba(255,255,255,0.7);
+      max-width: 560px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    /* Step cards grid */
+    .steps-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.5rem;
+      margin-bottom: 3rem;
+    }
+
+    @media (max-width: 1100px) { .steps-grid { grid-template-columns: repeat(2,1fr); } }
+    @media (max-width: 640px)  { .steps-grid { grid-template-columns: 1fr; } }
+
+    .step-card {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 14px;
+      padding: 1.8rem 1.4rem;
+      position: relative;
+      transition: all 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+    }
+
+    .step-card:hover {
+      background: rgba(255,255,255,0.09);
+      border-color: rgba(85,197,122,0.4);
+      transform: translateY(-4px);
+      box-shadow: 0 12px 30px rgba(0,0,0,0.35);
+    }
+
+    .step-badge {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #43936c, #2d6a4f);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      color: white;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      flex-shrink: 0;
+    }
+
+    .step-card.locked .step-badge {
+      background: rgba(255,255,255,0.12);
+    }
+
+    .step-card.active-step .step-badge {
+      background: linear-gradient(135deg, #f6c90e, #e0a800);
+      animation: pulse-glow 2s infinite;
+    }
+
+    @keyframes pulse-glow {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(246,201,14,0.4); }
+      50%       { box-shadow: 0 0 0 8px rgba(246,201,14,0); }
+    }
+
+    .step-number {
+      font-size: 0.65rem;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.4);
+    }
+
+    .step-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: white;
+      line-height: 1.3;
+    }
+
+    .step-desc {
+      font-size: 0.78rem;
+      color: rgba(255,255,255,0.6);
+      line-height: 1.5;
+    }
+
+    .step-locked-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: rgba(255,255,255,0.35);
+      letter-spacing: 0.5px;
+      margin-top: auto;
+    }
+
+    .step-active-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: #f6c90e;
+      margin-top: auto;
+    }
+
+    .step-done-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: #55c57a;
+      margin-top: auto;
+    }
+
+    /* Connector arrow between cards */
+    .step-connector {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: rgba(255,255,255,0.2);
+      font-size: 1rem;
+      margin-top: -0.5rem;
+    }
+
+    /* CTA button row */
+    .rec-cta-row {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .btn-apply-surveyor {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.7rem;
+      background: linear-gradient(135deg, #43936c, #2d6a4f);
+      color: white;
+      padding: 1rem 2.5rem;
+      border-radius: 50px;
+      font-size: 1.05rem;
+      font-weight: 700;
+      text-decoration: none;
+      box-shadow: 0 6px 20px rgba(67,147,108,0.45);
+      transition: all 0.3s ease;
+      letter-spacing: -0.2px;
+    }
+
+    .btn-apply-surveyor:hover {
+      background: linear-gradient(135deg, #4da878, #357656);
+      transform: translateY(-3px);
+      box-shadow: 0 12px 28px rgba(67,147,108,0.55);
+    }
+
+    .rec-cta-note {
+      font-size: 0.78rem;
+      color: rgba(255,255,255,0.45);
+      text-align: center;
+    }
+
+    .rec-cta-note strong {
+      color: rgba(255,255,255,0.65);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="landing-wrapper" style="min-height: 100vh;">
+
+    <!-- Top Header -->
+    <header class="landing-header" style="padding: 1.1rem 2.5rem; display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.25); backdrop-filter: blur(10px);">
+      <div class="landing-logo" style="display: flex; align-items: center; gap: 0.6rem;">
+        <i class="fa-solid fa-tractor" style="color: #55c57a; font-size: 1.25rem;"></i>
+        <span style="font-weight: 700; color: white; font-size: 0.95rem; letter-spacing: -0.2px;">AgriConnect</span>
+      </div>
+      <div style="display: flex; gap: 0.6rem; align-items: center;">
+        <a href="login.html?role=Farmer" class="btn-landing-login" style="background: transparent; border: 1px solid rgba(255,255,255,0.2); padding: 0.5rem 1.1rem; border-radius: 8px; color: white; font-weight: 700; text-decoration: none; font-size: 0.8rem; transition: all 0.22s;">
+          <i class="fa-solid fa-wheat-awn" style="color: #55c57a; margin-right: 4px;"></i> Farmer Login
+        </a>
+        <a href="login.html?role=Surveyor" class="btn-landing-login" style="background: transparent; border: 1px solid rgba(255,255,255,0.2); padding: 0.5rem 1.1rem; border-radius: 8px; color: white; font-weight: 700; text-decoration: none; font-size: 0.8rem; transition: all 0.22s;">
+          <i class="fa-solid fa-compass-drafting" style="color: #74b9ff; margin-right: 4px;"></i> Surveyor Login
+        </a>
+        <a href="applicant.html" class="btn-landing-login" style="background: linear-gradient(135deg, #43936c, #2d6a4f); border: none; padding: 0.5rem 1.1rem; border-radius: 8px; color: white; font-weight: 700; text-decoration: none; font-size: 0.8rem; transition: all 0.22s; box-shadow: 0 4px 10px rgba(67,147,108,0.3);">
+          <i class="fa-solid fa-user-tie" style="margin-right: 4px;"></i> Applicant Portal
+        </a>
+      </div>
+    </header>
+
+    <!-- Hero Content -->
+    <main class="landing-hero">
+      <div style="display:inline-flex; align-items:center; gap:8px; background:rgba(85,197,122,0.12); border:1px solid rgba(85,197,122,0.25); border-radius:50px; padding:5px 14px; margin-bottom:1.2rem; animation:fadeInUp 0.7s ease both;">
+        <span style="width:7px;height:7px;border-radius:50%;background:#55c57a;box-shadow:0 0 8px #55c57a;display:inline-block;animation:pulse-glow 1.5s infinite;"></span>
+        <span style="font-size:0.74rem;font-weight:700;color:#55c57a;letter-spacing:0.5px;">AgriConnect Platform — Now Live</span>
+      </div>
+      <h1>Connecting <span>Farmers</span><br>and Surveyors,<br>Seamlessly.</h1>
+      <p>AgriConnect bridges the gap between farmers and land surveyors using smart Dijkstra routing to assign the nearest certified professional — making land evaluation faster, fairer, and fully digital.</p>
+
+      <!-- CTA Buttons -->
+      <div style="display:flex; flex-direction:column; gap:0.9rem; align-items:flex-start; margin-top:0.5rem; animation:fadeInUp 1s 0.2s ease both;">
+        <div style="display:flex; gap:0.8rem; flex-wrap:wrap;">
+          <a href="login.html?role=Farmer" style="display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#43936c,#2d6a4f);color:white;text-decoration:none;padding:0.8rem 1.8rem;border-radius:50px;font-size:0.88rem;font-weight:700;box-shadow:0 8px 28px rgba(67,147,108,0.45);transition:all 0.3s cubic-bezier(0.34,1.56,0.64,1);position:relative;overflow:hidden;" onmouseover="this.style.transform='translateY(-3px) scale(1.03)';this.style.boxShadow='0 14px 40px rgba(67,147,108,0.55)'" onmouseout="this.style.transform='';this.style.boxShadow='0 8px 28px rgba(67,147,108,0.45)'">
+            <i class="fa-solid fa-wheat-awn"></i> Farmer Portal
+          </a>
+          <a href="apply.html" style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,0.08);border:1.5px solid rgba(255,255,255,0.22);color:white;text-decoration:none;padding:0.8rem 1.8rem;border-radius:50px;font-size:0.88rem;font-weight:700;backdrop-filter:blur(8px);transition:all 0.3s cubic-bezier(0.34,1.56,0.64,1);" onmouseover="this.style.transform='translateY(-3px)';this.style.background='rgba(85,197,122,0.18)';this.style.borderColor='rgba(85,197,122,0.5)'" onmouseout="this.style.transform='';this.style.background='rgba(255,255,255,0.08)';this.style.borderColor='rgba(255,255,255,0.22)'">
+            <i class="fa-solid fa-user-tie" style="color:#74b9ff;"></i> Become a Surveyor
+          </a>
+        </div>
+        <a href="apply.html" style="font-size:0.8rem;color:rgba(255,255,255,0.5);font-weight:600;display:flex;align-items:center;gap:5px;text-decoration:none;transition:color 0.2s;padding-left:4px;" onmouseover="this.style.color='#55c57a'" onmouseout="this.style.color='rgba(255,255,255,0.5)'">
+          <i class="fa-solid fa-arrow-right" style="font-size:0.7rem;"></i> Want to become a Surveyor? Apply Here
+        </a>
+      </div>
+
+      <!-- Floating Stats Row -->
+      <div style="display:flex;gap:0.8rem;margin-top:2.5rem;flex-wrap:wrap;animation:fadeInUp 1.1s 0.4s ease both;">
+        <div style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.14);backdrop-filter:blur(12px);border-radius:14px;padding:0.85rem 1.2rem;min-width:100px;">
+          <div style="font-size:1.6rem;font-weight:900;color:white;line-height:1;" id="stat-counter-1">0</div>
+          <div style="font-size:0.7rem;color:rgba(255,255,255,0.5);font-weight:600;margin-top:3px;">Active Farmers</div>
+        </div>
+        <div style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.14);backdrop-filter:blur(12px);border-radius:14px;padding:0.85rem 1.2rem;min-width:100px;">
+          <div style="font-size:1.6rem;font-weight:900;color:#55c57a;line-height:1;" id="stat-counter-2">0</div>
+          <div style="font-size:0.7rem;color:rgba(255,255,255,0.5);font-weight:600;margin-top:3px;">Certified Surveyors</div>
+        </div>
+        <div style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.14);backdrop-filter:blur(12px);border-radius:14px;padding:0.85rem 1.2rem;min-width:100px;">
+          <div style="font-size:1.6rem;font-weight:900;color:#74b9ff;line-height:1;" id="stat-counter-3">0</div>
+          <div style="font-size:0.7rem;color:rgba(255,255,255,0.5);font-weight:600;margin-top:3px;">Talukas Covered</div>
+        </div>
+      </div>
+    </main>
+
+
+
+
+    <!-- Crop Boundary mockup visual overlay -->
+    <div class="farm-plot-mockup">
+      <div class="plot-pin pin-tl"><i class="fa-solid fa-location-dot"></i></div>
+      <div class="plot-pin pin-tr"><i class="fa-solid fa-location-dot"></i></div>
+      <div class="plot-pin pin-bl"><i class="fa-solid fa-location-dot"></i></div>
+      <div class="plot-pin pin-br"><i class="fa-solid fa-location-dot"></i></div>
+    </div>
+
+    <!-- Help desk pill -->
+    <a href="#" class="helpline-badge" onclick="toggleChat(event)">
+      <i class="fa-solid fa-comment-dots"></i>
+      <span>Chat with Helpline</span>
+    </a>
+
+    <!-- Chat Window -->
+    <div class="chat-window" id="chat-window-el">
+      <div class="chat-header">
+        <div class="chat-header-left">
+          <div class="chat-status-dot"></div>
+          <span>AgriConnect Support</span>
+        </div>
+        <button class="chat-close-btn" onclick="toggleChat(event)"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="chat-messages" id="chat-messages-container">
+        <div class="chat-msg incoming">👋 Hello! I'm the AgriConnect assistant. How can I help you today?</div>
+      </div>
+      <div class="chat-input-area">
+        <input type="text" id="chat-user-input" class="chat-input-field" placeholder="Ask anything..." onkeypress="handleChatKey(event)">
+        <button class="chat-send-btn" onclick="sendChatMessage()"><i class="fa-solid fa-paper-plane"></i></button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       SECTION 2 — Surveyor Recruitment Process
+  ════════════════════════════════════════ -->
+  <section class="recruitment-section" id="recruitment">
+
+    <div class="rec-section-header">
+      <span class="eyebrow"><i class="fa-solid fa-clipboard-list"></i> &nbsp; Surveyor Recruitment</span>
+      <h2>How to Become an<br>AgriConnect Certified Surveyor</h2>
+      <p>Follow the verified step-by-step process. Each phase must be completed and approved before proceeding. Only fully verified surveyors receive their login credentials.</p>
+    </div>
+
+    <!-- Row 1: Steps 1–4 -->
+    <div class="steps-grid">
+
+      <div class="step-card active-step">
+        <div class="step-badge"><i class="fa-solid fa-file-signature"></i></div>
+        <div class="step-number">Phase 1</div>
+        <div class="step-title">Submit Online Application</div>
+        <div class="step-desc">Fill in your qualifications, experience, preferred taluka, civil license ID, and Aadhaar details via the secure application form.</div>
+        <span class="step-active-tag"><i class="fa-solid fa-bolt"></i> Start Here — Open Now</span>
+      </div>
+
+      <div class="step-card locked">
+        <div class="step-badge"><i class="fa-solid fa-id-card-clip"></i></div>
+        <div class="step-number">Phase 2</div>
+        <div class="step-title">Document Verification (HR)</div>
+        <div class="step-desc">Back-office HR reviews your submitted documents, license validity, educational certificates and field eligibility.</div>
+        <span class="step-locked-tag"><i class="fa-solid fa-lock"></i> Unlocked after Phase 1</span>
+      </div>
+
+      <div class="step-card locked">
+        <div class="step-badge"><i class="fa-solid fa-person-chalkboard"></i></div>
+        <div class="step-number">Phase 3</div>
+        <div class="step-title">Technical Interview</div>
+        <div class="step-desc">A qualified operations officer conducts your technical interview covering field surveying, GPS boundary verification, and coordinate mapping.</div>
+        <span class="step-locked-tag"><i class="fa-solid fa-lock"></i> Unlocked after Phase 2</span>
+      </div>
+
+      <div class="step-card locked">
+        <div class="step-badge"><i class="fa-solid fa-shield-halved"></i></div>
+        <div class="step-number">Phase 4</div>
+        <div class="step-title">Background Check</div>
+        <div class="step-desc">A criminal record and professional reference check is performed. Only candidates with a clean background proceed to onboarding.</div>
+        <span class="step-locked-tag"><i class="fa-solid fa-lock"></i> Unlocked after Phase 3</span>
+      </div>
+
+    </div>
+
+    <!-- Row 2: Steps 5–8 -->
+    <div class="steps-grid">
+
+      <div class="step-card locked">
+        <div class="step-badge"><i class="fa-solid fa-map-location"></i></div>
+        <div class="step-number">Phase 5</div>
+        <div class="step-title">Taluka Allocation</div>
+        <div class="step-desc">Based on district capacity, you are allocated to an available taluka. If capacity is full, you are placed on a Linked-List waitlist and onboarded when a vacancy arises.</div>
+        <span class="step-locked-tag"><i class="fa-solid fa-lock"></i> Unlocked after Phase 4</span>
+      </div>
+
+      <div class="step-card locked">
+        <div class="step-badge"><i class="fa-solid fa-id-badge"></i></div>
+        <div class="step-number">Phase 6</div>
+        <div class="step-title">Employee ID Issued</div>
+        <div class="step-desc">Upon successful allocation, an official AgriConnect employee ID (format AGR-YYYY-XXX) is assigned. You become an Active Certified Surveyor in the network.</div>
+        <span class="step-locked-tag"><i class="fa-solid fa-lock"></i> Unlocked after Phase 5</span>
+      </div>
+
+      <div class="step-card locked">
+        <div class="step-badge"><i class="fa-solid fa-key"></i></div>
+        <div class="step-number">Phase 7</div>
+        <div class="step-title">Generate Login Password</div>
+        <div class="step-desc">Once verified as Active, visit the <strong style="color:rgba(255,255,255,0.75)">Applicant Portal</strong> and use the Password Generator with your registered mobile to create your secure surveyor credentials.</div>
+        <span class="step-locked-tag"><i class="fa-solid fa-lock"></i> Only for Active Surveyors</span>
+      </div>
+
+      <div class="step-card locked">
+        <div class="step-badge"><i class="fa-solid fa-satellite-dish"></i></div>
+        <div class="step-number">Phase 8</div>
+        <div class="step-title">Access Field Dashboard</div>
+        <div class="step-desc">Log in with your mobile and generated password to access your Surveyor Field Dashboard — accept survey jobs, upload GPS coordinates, and sign off field reports.</div>
+        <span class="step-locked-tag"><i class="fa-solid fa-lock"></i> Unlocked after Phase 7</span>
+      </div>
+
+    </div>
+
+    <!-- CTA -->
+    <div class="rec-cta-row">
+      <a href="apply.html" class="btn-apply-surveyor">
+        <i class="fa-solid fa-paper-plane"></i> Apply as Surveyor Candidate
+      </a>
+      <div class="rec-cta-note">
+        After applying, log in to the <strong>Surveyor Applicant Portal</strong> to track each step of your onboarding.
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════
+       FOOTER — Clean Site Footer
+  ════════════════════════════════════════════════════════ -->
+  <footer style="background:#05100a; border-top:1px solid rgba(255,255,255,0.07); padding: 4rem 2rem 3rem;">
+    <div style="max-width: 1100px; margin: 0 auto; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 2rem; align-items: center;">
+      <div style="display: flex; align-items: center; gap: 0.6rem;">
+        <i class="fa-solid fa-tractor" style="color:#55c57a; font-size:1.4rem;"></i>
+        <span style="font-weight: 800; color: white; font-size: 1.1rem; letter-spacing: -0.2px;">AgriConnect</span>
+      </div>
+      <div style="display: flex; gap: 1.5rem; flex-wrap: wrap;">
+        <a href="login.html?role=Farmer" style="color: rgba(255,255,255,0.45); font-size: 0.8rem; text-decoration: none; font-weight: 600; transition: color 0.2s;" onmouseover="this.style.color='#55c57a'" onmouseout="this.style.color='rgba(255,255,255,0.45)'">Farmer Login</a>
+        <a href="register.html" style="color: rgba(255,255,255,0.45); font-size: 0.8rem; text-decoration: none; font-weight: 600; transition: color 0.2s;" onmouseover="this.style.color='#55c57a'" onmouseout="this.style.color='rgba(255,255,255,0.45)'">Register Farm</a>
+        <a href="apply.html" style="color: rgba(255,255,255,0.45); font-size: 0.8rem; text-decoration: none; font-weight: 600; transition: color 0.2s;" onmouseover="this.style.color='#55c57a'" onmouseout="this.style.color='rgba(255,255,255,0.45)'">Apply as Surveyor</a>
+        <a href="applicant.html" style="color: rgba(255,255,255,0.45); font-size: 0.8rem; text-decoration: none; font-weight: 600; transition: color 0.2s; border-bottom: 1.5px solid #55c57a; padding-bottom: 2px;" onmouseover="this.style.color='#55c57a'" onmouseout="this.style.color='rgba(255,255,255,0.45)'">Surveyor Applicant Portal</a>
+      </div>
+    </div>
+    <div style="max-width: 1100px; margin: 2rem auto 0; padding-top: 1.5rem; border-top: 1px solid rgba(255,255,255,0.06); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 1rem; font-size: 0.72rem; color: rgba(255,255,255,0.25);">
+      <div>&copy; 2026 AgriConnect. Bridging land evaluation and farmers seamlessly.</div>
+      <div>Designed for modern digital agriculture.</div>
+    </div>
+  </footer>
+
+  <script src="config.js?v=2.2"></script>
+  <script src="api.js?v=2.2"></script>
+  <script src="shared.js?v=2.2"></script>
+  <script>
+    function toggleChat(e) {
+      if (e) e.preventDefault();
+      const el = document.getElementById('chat-window-el');
+      if (el) el.classList.toggle('active');
+    }
+
+    function handleChatKey(e) {
+      if (e.key === 'Enter') sendChatMessage();
+    }
+
+    function sendChatMessage() {
+      const input = document.getElementById('chat-user-input');
+      const text = input ? input.value.trim() : '';
+      if (!text) return;
+      appendMessage(text, 'outgoing');
+      input.value = '';
+      setTimeout(() => {
+        let reply = 'Please log in or register to book immediate appointments!';
+        const lower = text.toLowerCase();
+        if (lower.includes('apply') || lower.includes('survey') || lower.includes('job')) {
+          reply = "Click 'Apply as Surveyor Candidate' or head to the Applicant Portal to begin!";
+        } else if (lower.includes('password') || lower.includes('login')) {
+          reply = 'To log in as a surveyor candidate, go to the Applicant Portal. Use your registered email and password.';
+        } else if (lower.includes('book') || lower.includes('farmer')) {
+          reply = 'Farmers can register farm plots and search surveyors. Dijkstra routing assigns the nearest available surveyor automatically!';
+        } else if (lower.includes('track') || lower.includes('status')) {
+          reply = 'Track your surveyor application in the Surveyor Applicant Portal. Click Applicant Portal in the header!';
+        } else if (lower.includes('cost') || lower.includes('price')) {
+          reply = 'Survey costs are calculated at ₹500 per acre. Register your plot and we calculate it instantly!';
+        }
+        appendMessage(reply, 'incoming');
+      }, 750);
+    }
+
+    function appendMessage(text, type) {
+      const container = document.getElementById('chat-messages-container');
+      if (!container) return;
+      const msg = document.createElement('div');
+      msg.className = `chat-msg ${type}`;
+      msg.innerText = text;
+      container.appendChild(msg);
+      container.scrollTop = container.scrollHeight;
+    }
+
+    // Animated counter for hero stats
+    function animateCounter(id, target, suffix) {
+      let start = 0;
+      const duration = 1400;
+      const step = Math.max(1, Math.ceil(target / (duration / 16)));
+      const el = document.getElementById(id);
+      if (!el) return;
+      const timer = setInterval(() => {
+        start = Math.min(start + step, target);
+        el.textContent = start + (suffix || '');
+        if (start >= target) clearInterval(timer);
+      }, 16);
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      const db = new AgriConnectDB();
+      const farmerCount = Object.keys(db.farmers || {}).length || 2;
+      const surveyorCount = Object.keys(db.surveyors || {}).length || 3;
+      const talukaCount = Array.isArray(talukas) ? talukas.length : 4;
+
+      setTimeout(() => {
+        animateCounter('stat-counter-1', Math.max(120, farmerCount * 50), '+');
+        animateCounter('stat-counter-2', Math.max(18, surveyorCount * 6), '+');
+        animateCounter('stat-counter-3', talukaCount, '');
+      }, 400);
+    });
+  </script>
+</body>
+</html>
