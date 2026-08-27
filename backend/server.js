@@ -3,11 +3,12 @@
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
-const path = require('path');
 const mongoose = require('mongoose');
 
-// Load environment variables from backend/.env
-dotenv.config({ path: path.join(__dirname, '.env') });
+// Load environment variables
+// Local: backend/.env
+// Render: Environment Variables
+dotenv.config();
 
 // Database
 const connectDB = require('./config/db');
@@ -22,6 +23,7 @@ const adminRoutes = require('./routes/adminRoutes');
 const talukaRoutes = require('./routes/talukaRoutes');
 
 const app = express();
+
 const PORT = process.env.PORT || 5000;
 
 
@@ -44,7 +46,8 @@ const allowedOrigins = [
   'http://127.0.0.1:5173'
 ];
 
-// Add FRONTEND_URL from Render environment variables if available
+
+// Add FRONTEND_URL from Render environment variables
 if (process.env.FRONTEND_URL) {
   const frontendUrls = process.env.FRONTEND_URL
     .split(',')
@@ -56,6 +59,7 @@ if (process.env.FRONTEND_URL) {
     }
   });
 }
+
 
 app.use(
   cors({
@@ -114,22 +118,6 @@ connectDB();
 
 
 // ======================================================
-// SERVE FRONTEND STATIC FILES
-// ======================================================
-
-app.use(express.static(path.join(__dirname, '..')));
-
-
-// ======================================================
-// ROOT ROUTE
-// ======================================================
-
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, '..', 'index.html'));
-});
-
-
-// ======================================================
 // HEALTH CHECK
 // ======================================================
 
@@ -152,6 +140,7 @@ app.get('/api/health', (req, res) => {
         : 'disconnected';
 
   res.status(isConnected ? 200 : 503).json({
+
     success: isConnected,
 
     message: isConnected
@@ -165,6 +154,7 @@ app.get('/api/health', (req, res) => {
     environment: process.env.NODE_ENV || 'production',
 
     timestamp: new Date().toISOString()
+
   });
 });
 
@@ -195,8 +185,11 @@ app.use('/api/talukas', talukaRoutes);
 app.use((req, res) => {
 
   res.status(404).json({
+
     success: false,
+
     message: `Route ${req.originalUrl} not found`
+
   });
 
 });
@@ -211,8 +204,11 @@ app.use((err, req, res, next) => {
   console.error('Unhandled server error:', err);
 
   res.status(err.status || 500).json({
+
     success: false,
+
     message: err.message || 'Internal Server Error'
+
   });
 
 });
@@ -225,35 +221,19 @@ app.use((err, req, res, next) => {
 const server = app.listen(PORT, '0.0.0.0', () => {
 
   console.log('');
+
   console.log('======================================================');
+
   console.log('🌾 AgriConnect Backend Running');
+
   console.log('======================================================');
 
   console.log(`🌐 Port: ${PORT}`);
 
-  console.log(`🌐 Local URL: http://localhost:${PORT}`);
-
-  console.log(
-    `🔑 Login Page: http://localhost:${PORT}/login.html`
-  );
-
-  console.log(
-    `👑 Admin Page: http://localhost:${PORT}/admin.html`
-  );
-
-  console.log(
-    `🌾 Farmer Page: http://localhost:${PORT}/farmer.html`
-  );
-
-  console.log(
-    `📐 Surveyor Page: http://localhost:${PORT}/surveyor.html`
-  );
-
-  console.log(
-    `📡 API Health: http://localhost:${PORT}/api/health`
-  );
+  console.log(`📡 API Health: /api/health`);
 
   console.log('======================================================');
+
   console.log('');
 
 });
