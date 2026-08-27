@@ -1,17 +1,20 @@
 {
-  "name": "agriconnect",
+  "name": "agriconnect-frontend",
   "version": "1.0.0",
-  "description": "AgriConnect Full-Stack Application",
-  "main": "start.js",
+  "description": "AgriConnect Frontend",
+  "type": "module",
   "scripts": {
-    "start": "node backend/server.js",
-    "build": "cd backend && npm install",
-    "postinstall": "cd backend && npm install"
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
   },
   "engines": {
     "node": ">=18.0.0"
   },
   "dependencies": {
-    "mongodb": "^7.6.0"
+    "@vitejs/plugin-react": "^latest",
+    "vite": "^latest",
+    "react": "^latest",
+    "react-dom": "^latest"
   }
 }

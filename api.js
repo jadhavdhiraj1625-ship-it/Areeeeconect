@@ -67,11 +67,11 @@ class AgriConnectAPI {
       }
 
       // Production backend on Render
-      return 'https://a-b-1-snoy.onrender.com/api';
+      return 'https://agreeconnect-backend.onrender.com/api';
     }
 
     // Final fallback
-    return 'https://a-b-1-snoy.onrender.com/api';
+    return 'https://agreeconnect-backend.onrender.com/api';
   }
 
   static getToken() {
