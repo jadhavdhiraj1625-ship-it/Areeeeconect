@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AgriConnect – Sign In</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link rel="stylesheet" href="shared_styles.css" />
+  <style>
+    body, html {
+      margin: 0; padding: 0; min-height: 100vh;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: #07120a;
+    }
+    .login-bg {
+      min-height: 100vh;
+      background: linear-gradient(160deg, rgba(7,18,10,0.94) 0%, rgba(13,38,20,0.92) 50%, rgba(7,18,10,0.97) 100%),
+                  url('https://images.unsplash.com/photo-1500937386664-56d1dfef3854?auto=format&fit=crop&w=1600&q=80') center/cover no-repeat;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 30px 16px;
+      box-sizing: border-box;
+    }
+    .lp-container { width: 100%; max-width: 440px; margin: 0 auto; }
+    .lp-back {
+      display: inline-flex; align-items: center; gap: 7px;
+      color: rgba(255,255,255,0.65); font-size: 13px; font-weight: 600;
+      text-decoration: none; margin-bottom: 20px; transition: color .2s;
+    }
+    .lp-back:hover { color: #55c57a; }
+    .lp-card {
+      background: rgba(10, 24, 14, 0.92);
+      border: 1px solid rgba(85,197,122,0.22);
+      border-radius: 24px;
+      padding: 36px 32px 30px;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.04);
+      backdrop-filter: blur(16px);
+      box-sizing: border-box;
+    }
+    .lp-brand { display: flex; align-items: center; gap: 10px; margin-bottom: 22px; }
+    .lp-brand-icon {
+      width: 40px; height: 40px; border-radius: 12px;
+      background: linear-gradient(135deg,#22c55e,#16a34a);
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-size: 18px;
+    }
+    .lp-brand-name {
+      font-family: 'Outfit', sans-serif; font-size: 20px;
+      font-weight: 800; color: #fff; letter-spacing: -.3px;
+    }
+    .lp-title {
+      font-family: 'Outfit', sans-serif; font-size: 22px;
+      font-weight: 800; color: #fff; margin: 0 0 5px;
+    }
+    .lp-sub { font-size: 13px; color: rgba(255,255,255,0.55); margin: 0 0 16px; }
+
+    /* Role tabs */
+    .role-tabs {
+      display: grid; grid-template-columns: 1fr 1fr 1fr;
+      gap: 6px; background: rgba(255,255,255,0.06);
+      border-radius: 13px; padding: 4px; margin-bottom: 22px;
+    }
+    .role-tab {
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+      padding: 9px 6px; border-radius: 10px; font-size: 12.5px; font-weight: 700;
+      color: rgba(255,255,255,0.6); cursor: pointer; transition: all .2s; user-select: none;
+    }
+    .role-tab.active {
+      background: #22c55e; color: #fff;
+      box-shadow: 0 4px 14px rgba(34,197,94,.4);
+    }
+    .role-tab:hover:not(.active) { color: #fff; background: rgba(255,255,255,0.08); }
+
+    /* Form */
+    .lf-group { margin-bottom: 16px; }
+    .lf-group label {
+      display: block; font-size: 12px; font-weight: 600;
+      color: rgba(255,255,255,0.75); margin-bottom: 6px;
+    }
+    .lf-input {
+      width: 100%; padding: 11px 14px; border-radius: 11px;
+      background: rgba(255,255,255,0.07);
+      border: 1.5px solid rgba(255,255,255,0.12);
+      color: #fff; font-size: 14px; font-family: inherit;
+      box-sizing: border-box; transition: border-color .2s, background .2s;
+    }
+    .lf-input:focus { outline: none; border-color: #22c55e; background: rgba(255,255,255,0.1); }
+    .lf-input::placeholder { color: rgba(255,255,255,0.3); }
+    .pw-wrap { position: relative; }
+    .pw-wrap .lf-input { padding-right: 42px; }
+    .pw-eye {
+      position: absolute; right: 13px; top: 50%;
+      transform: translateY(-50%); color: rgba(255,255,255,0.45);
+      cursor: pointer; font-size: 14px; transition: color .2s;
+    }
+    .pw-eye:hover { color: #fff; }
+    .lp-submit {
+      width: 100%; padding: 13px; border-radius: 12px;
+      background: linear-gradient(135deg,#22c55e,#16a34a);
+      border: none; color: #fff; font-size: 14px; font-weight: 700;
+      cursor: pointer; font-family: inherit; margin-top: 6px;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      transition: opacity .2s, transform .15s;
+    }
+    .lp-submit:hover { opacity: .92; transform: translateY(-1px); }
+    .lp-submit:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+    .lp-error {
+      background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.4);
+      color: #fca5a5; border-radius: 10px; padding: 10px 14px;
+      font-size: 12.5px; font-weight: 600; margin-bottom: 16px; display: none;
+    }
+    .lp-card-footer {
+      text-align: center; margin-top: 20px; padding-top: 18px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      font-size: 12.5px; color: rgba(255,255,255,0.5);
+    }
+    .lp-card-footer a { color: #55c57a; text-decoration: none; font-weight: 600; }
+    .lp-card-footer a:hover { text-decoration: underline; }
+    .dot { margin: 0 6px; }
+
+    /* Demo Credentials box */
+    .demo-box {
+      margin-top: 20px; background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08); border-radius: 16px;
+      padding: 16px 20px;
+    }
+    .demo-eyebrow {
+      font-size: 11px; font-weight: 700; color: #55c57a;
+      letter-spacing: .5px; text-transform: uppercase; margin-bottom: 10px;
+    }
+    .demo-row {
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 12px; color: rgba(255,255,255,0.65); padding: 5px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .demo-row:last-child { border-bottom: none; }
+    .demo-badge {
+      display: inline-block; padding: 2px 8px; border-radius: 6px;
+      font-size: 11px; font-weight: 700;
+    }
+    .db-green  { background: rgba(34,197,94,0.18);  color: #4ade80; }
+    .db-blue   { background: rgba(59,130,246,0.18); color: #60a5fa; }
+    .db-yellow { background: rgba(234,179,8,0.18);  color: #fde047; }
+
+    /* Applicant Portal link */
+    .applicant-promo {
+      margin-top: 14px; background: rgba(255,255,255,0.03);
+      border: 1px dashed rgba(85,197,122,0.3); border-radius: 14px;
+      padding: 14px 18px; display: flex; align-items: center; gap: 12px;
+      text-decoration: none; color: inherit; transition: background .2s, border-color .2s;
+    }
+    .applicant-promo:hover { background: rgba(85,197,122,0.07); border-color: #55c57a; }
+    .ap-icon {
+      width: 36px; height: 36px; border-radius: 10px;
+      background: rgba(85,197,122,0.15); color: #55c57a;
+      display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0;
+    }
+    .ap-text-title { font-size: 13px; font-weight: 700; color: #fff; }
+    .ap-text-sub   { font-size: 11px; color: rgba(255,255,255,0.5); margin-top: 1px; }
+    .ap-arrow      { color: #55c57a; margin-left: auto; font-size: 12px; }
+  </style>
+</head>
+<body>
+<div class="login-bg">
+  <div class="lp-container">
+
+    <a href="index.html" class="lp-back">
+      <i class="fa-solid fa-arrow-left"></i> Back to Home
+    </a>
+
+    <!-- ── Main Login Card ── -->
+    <div class="lp-card">
+
+      <div class="lp-brand">
+        <div class="lp-brand-icon"><i class="fa-solid fa-tractor"></i></div>
+        <span class="lp-brand-name">AgriConnect</span>
+      </div>
+
+      <h1 class="lp-title">Sign In</h1>
+      <p class="lp-sub">Choose your role and sign in to your account.</p>
+
+      <div style="margin-bottom:16px;">
+        <span id="login-db-badge" style="display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:99px;font-size:11px;font-weight:700;background:rgba(255,255,255,0.08);color:#fff;">
+          <i class="fa-solid fa-spinner fa-spin"></i> Checking Database Connection...
+        </span>
+      </div>
+
+      <!-- Role tabs -->
+      <div class="role-tabs">
+        <div class="role-tab active" id="tab-farmer" onclick="switchRole('Farmer')">
+          <i class="fa-solid fa-wheat-awn"></i>Farmer
+        </div>
+        <div class="role-tab" id="tab-surveyor" onclick="switchRole('Surveyor')">
+          <i class="fa-solid fa-compass-drafting"></i>Surveyor
+        </div>
+        <div class="role-tab" id="tab-admin" onclick="switchRole('Admin')">
+          <i class="fa-solid fa-shield-halved"></i>Admin
+        </div>
+      </div>
+
+      <!-- Error Strip -->
+      <div class="lp-error" id="lp-error-strip"></div>
+
+      <form id="login-form" onsubmit="handleLogin(event)" novalidate>
+        <div class="lf-group">
+          <label for="login-username" id="lbl-username">Mobile Number</label>
+          <input type="text" id="login-username" class="lf-input"
+            placeholder="Enter your mobile number" autocomplete="username" required>
+        </div>
+        <div class="lf-group">
+          <label for="login-password">Password</label>
+          <div class="pw-wrap">
+            <input type="password" id="login-password" class="lf-input"
+              placeholder="Enter your password" autocomplete="current-password" required>
+            <span class="pw-eye" onclick="togglePw()">
+              <i class="fa-solid fa-eye" id="pw-eye-icon"></i>
+            </span>
+          </div>
+        </div>
+        <input type="hidden" id="login-role-val" value="Farmer">
+        <button type="submit" class="lp-submit" id="login-submit-btn">
+          <i class="fa-solid fa-right-to-bracket"></i>
+          <span id="login-btn-text">Sign In as Farmer</span>
+        </button>
+      </form>
+
+      <div class="lp-card-footer">
+        New farmer? <a href="register.html">Create Account</a>
+        <span class="dot">·</span>
+        Surveyor candidate? <a href="apply.html">Apply Here</a>
+      </div>
+    </div>
+
+    <!-- ── Role Access Info ── -->
+    <div class="demo-box">
+      <div class="demo-eyebrow"><i class="fa-solid fa-circle-info"></i> &nbsp;Role Access &amp; Sign-In</div>
+      <div class="demo-row">
+        <span class="demo-badge db-green">🌾 Farmer</span>
+        <span>Sign in with 10-digit mobile or <a href="register.html" style="color:#86efac;text-decoration:underline;">Create Account</a></span>
+      </div>
+      <div class="demo-row">
+        <span class="demo-badge db-blue">📐 Surveyor</span>
+        <span>Sign in with Employee ID / mobile or <a href="apply.html" style="color:#93c5fd;text-decoration:underline;">Apply Here</a></span>
+      </div>
+      <div class="demo-row">
+        <span class="demo-badge db-yellow">🔑 Admin</span>
+        <span><strong style="color:rgba(255,255,255,0.8)">admin@agriconnect.in</strong> &nbsp;/&nbsp; adminpassword</span>
+      </div>
+    </div>
+
+    <!-- ── Applicant Portal Promo ── -->
+    <a href="applicant.html" class="applicant-promo">
+      <div class="ap-icon"><i class="fa-solid fa-user-tie"></i></div>
+      <div>
+        <div class="ap-text-title">Surveyor Applicant Portal</div>
+        <div class="ap-text-sub">Track application status &amp; generate your login password</div>
+      </div>
+      <i class="fa-solid fa-chevron-right ap-arrow"></i>
+    </a>
+
+  </div>
+</div>
+
+<script src="config.js?v=2.2"></script>
+<script src="api.js?v=2.2"></script>
+<script src="shared.js?v=2.2"></script>
+<script>
+  let currentRole = 'Farmer';
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const params = new URLSearchParams(window.location.search);
+    const roleParam = params.get('role');
+    if (roleParam && ['Farmer', 'Surveyor', 'Admin'].includes(roleParam)) {
+      switchRole(roleParam);
+    }
+    checkServerConnection();
+  });
+
+  async function checkServerConnection() {
+    const badge = document.getElementById('login-db-badge');
+    if (!badge) return;
+    try {
+      const res = await AgriConnectAPI.apiGet('/health');
+      if (res && res.success) {
+        badge.innerHTML = '<i class="fa-solid fa-circle-check" style="color:#4ade80;"></i> Atlas DB: <strong>Connected</strong>';
+        badge.style.background = 'rgba(34,197,94,0.2)';
+        badge.style.color = '#86efac';
+      } else {
+        badge.innerHTML = '<i class="fa-solid fa-circle-exclamation" style="color:#fde047;"></i> Local Mode (Server Offline)';
+        badge.style.background = 'rgba(234,179,8,0.2)';
+        badge.style.color = '#fef08a';
+      }
+    } catch (e) {
+      badge.innerHTML = '<i class="fa-solid fa-circle-exclamation" style="color:#fde047;"></i> Local Mode (Server Offline)';
+      badge.style.background = 'rgba(234,179,8,0.2)';
+      badge.style.color = '#fef08a';
+    }
+  }
+
+  function switchRole(role) {
+    currentRole = role;
+    document.getElementById('login-role-val').value = role;
+    document.getElementById('login-btn-text').textContent = `Sign In as ${role}`;
+    const labels = { Farmer:'Mobile Number', Surveyor:'Mobile / Employee ID', Admin:'Username / Email' };
+    const phs    = { Farmer:'Enter your 10-digit mobile number', Surveyor:'Mobile or Employee ID (e.g. AGR-2026-001)', Admin:'Enter admin email (admin@agriconnect.in)' };
+    document.getElementById('lbl-username').textContent    = labels[role];
+    document.getElementById('login-username').placeholder  = phs[role];
+    ['Farmer','Surveyor','Admin'].forEach(r =>
+      document.getElementById(`tab-${r.toLowerCase()}`).classList.toggle('active', r === role)
+    );
+    hideError();
+  }
+
+  function togglePw() {
+    const i = document.getElementById('login-password');
+    const e = document.getElementById('pw-eye-icon');
+    i.type = i.type === 'password' ? 'text' : 'password';
+    e.className = i.type === 'password' ? 'fa-solid fa-eye' : 'fa-solid fa-eye-slash';
+  }
+
+  function showError(msg) {
+    const el = document.getElementById('lp-error-strip');
+    el.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i> ${msg}`;
+    el.style.display = 'block';
+  }
+  function hideError() { document.getElementById('lp-error-strip').style.display = 'none'; }
+
+  async function performLogin(identifier, password, role) {
+    // Tier 1: Use AgriConnectAuth if available
+    const auth = (typeof AgriConnectAuth !== 'undefined' ? AgriConnectAuth : (typeof window !== 'undefined' ? window.AgriConnectAuth : null));
+    if (auth && typeof auth.login === 'function') {
+      try {
+        const res = await auth.login(identifier, password, role);
+        if (res) return res;
+      } catch (e) {
+        console.warn('Tier 1 auth exception, proceeding to Tier 2:', e);
+      }
+    }
+
+    function determineDashboard(backendRole, requestedRole) {
+      const eff = (backendRole || requestedRole || '').toLowerCase();
+      if (eff === 'admin') return { role: 'Admin', page: 'admin.html' };
+      if (eff === 'surveyor') return { role: 'Surveyor', page: 'surveyor.html' };
+      if (eff === 'candidate' || eff === 'applicant') return { role: 'Applicant', page: 'applicant.html' };
+      return { role: 'Farmer', page: 'farmer.html' };
+    }
+
+    // Tier 2: Direct AgriConnectAPI helper
+    const api = (typeof AgriConnectAPI !== 'undefined' ? AgriConnectAPI : (typeof window !== 'undefined' ? window.AgriConnectAPI : null));
+    if (api && typeof api.apiPost === 'function') {
+      try {
+        const res = await api.apiPost('/auth/login', {
+          identifier,
+          email: identifier,
+          mobile: identifier,
+          username: identifier,
+          password,
+          role: role.toLowerCase()
+        });
+        if (res && res.success && res.token) {
+          api.setToken(res.token);
+          const routeInfo = determineDashboard(res.user?.role, role);
+          const user = { ...(res.user || { name: identifier }), role: routeInfo.role };
+          api.setCurrentUser(user);
+          return { success: true, redirect: routeInfo.page, user, token: res.token };
+        }
+        if (res && res.status >= 400 && res.status < 500) {
+          return { success: false, message: res.message || 'Invalid credentials' };
+        }
+      } catch (e) {
+        console.warn('Tier 2 API exception, proceeding to Tier 3:', e);
+      }
+    }
+
+    // Tier 3: Direct Native Browser Fetch (100% resilient standalone fallback)
+    try {
+      const baseUrl = (typeof window !== 'undefined' && window.AgriConnectConfig && typeof window.AgriConnectConfig.getBaseUrl === 'function')
+        ? window.AgriConnectConfig.getBaseUrl()
+        : ((typeof AgriConnectAPI !== 'undefined' && typeof AgriConnectAPI.getBaseUrl === 'function')
+            ? AgriConnectAPI.getBaseUrl()
+            : ((typeof window !== 'undefined' && window.API_BASE_URL) ? window.API_BASE_URL : 'http://localhost:5000/api'));
+
+      const rawRes = await fetch(baseUrl + '/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          identifier,
+          email: identifier,
+          mobile: identifier,
+          username: identifier,
+          password,
+          role: role.toLowerCase()
+        })
+      });
+      const data = await rawRes.json();
+      if (data && data.success && data.token) {
+        const routeInfo = determineDashboard(data.user?.role, role);
+        try {
+          localStorage.setItem('agriconnect_token', data.token);
+          sessionStorage.setItem('agriconnect_token', data.token);
+          const user = { ...(data.user || { name: identifier }), role: routeInfo.role };
+          localStorage.setItem('currentUser', JSON.stringify(user));
+          sessionStorage.setItem('currentUser', JSON.stringify(user));
+          sessionStorage.setItem('agriconnect_user', JSON.stringify(user));
+        } catch (e) {}
+        return { success: true, redirect: routeInfo.page, user: data.user, token: data.token };
+      }
+      return { success: false, message: (data && data.message) ? data.message : 'Invalid credentials. Please check your username and password.' };
+    } catch (netErr) {
+      return { success: false, message: 'Server is unreachable (' + netErr.message + '). Please ensure the backend server is running.' };
+    }
+  }
+
+  async function handleLogin(e) {
+    e.preventDefault();
+    hideError();
+    const username = document.getElementById('login-username').value.trim();
+    const password = document.getElementById('login-password').value;
+    if (!username || !password) { showError('Please fill in all fields.'); return; }
+
+    const btn  = document.getElementById('login-submit-btn');
+    const text = document.getElementById('login-btn-text');
+    btn.disabled = true;
+    text.textContent = 'Signing in…';
+
+    try {
+      const result = await performLogin(username, password, currentRole);
+      const isSuccess = (result === true || (result && result.success === true));
+      const redirectUrl = (result && result.redirect) ? result.redirect : (currentRole === 'Admin' ? 'admin.html' : currentRole === 'Farmer' ? 'farmer.html' : currentRole === 'Applicant' ? 'applicant.html' : 'surveyor.html');
+
+      if (isSuccess) {
+        window.location.href = redirectUrl;
+      } else {
+        showError((result && result.message) ? result.message : 'Invalid credentials. Please try again.');
+        btn.disabled = false;
+        text.textContent = `Sign In as ${currentRole}`;
+      }
+    } catch (err) {
+      console.error('Login error:', err);
+      showError('Login error: ' + (err.message || 'Server error'));
+      btn.disabled = false;
+      text.textContent = `Sign In as ${currentRole}`;
+    }
+  }
+</script>
+</body>
+</html>

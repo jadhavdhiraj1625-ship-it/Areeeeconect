@@ -1,0 +1,1118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AgriConnect – Surveyor Applicant Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="shared_styles.css">
+  <style>
+    body { margin: 0; background: #05100a; font-family: 'Outfit', sans-serif; }
+
+    .ap-page {
+      min-height: 100vh;
+      background-image: linear-gradient(rgba(5, 16, 10, 0.94) 0%, rgba(10, 30, 18, 0.9) 100%), url('agriconnect_banner.jpg');
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Top navbar */
+    .ap-topbar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1.1rem 2.5rem; background: rgba(0,0,0,0.3); backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .ap-brand {
+      display: flex; align-items: center; gap: 0.6rem; font-size: 0.95rem; font-weight: 700; color: white; text-decoration: none;
+    }
+    .ap-brand i { color: #55c57a; font-size: 1.2rem; }
+
+    /* Login layout */
+    .ap-login-container {
+      max-width: 440px; margin: auto; padding: 3rem 1.5rem; width: 100%; box-sizing: border-box;
+    }
+    .ap-login-card {
+      background: rgba(8, 18, 12, 0.92); border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 20px; padding: 2.6rem 2.4rem; color: white;
+      box-shadow: 0 30px 70px rgba(0,0,0,0.6);
+    }
+
+    /* Dashboard layout */
+    .ap-dashboard-container {
+      max-width: 1200px; margin: 0 auto; padding: 2.2rem 1.5rem; width: 100%;
+      display: grid; grid-template-columns: 280px 1fr; gap: 1.8rem; box-sizing: border-box;
+    }
+    @media (max-width: 900px) {
+      .ap-dashboard-container { grid-template-columns: 1fr; }
+    }
+
+    /* Left Nav Sidebar */
+    .ap-sidebar {
+      background: rgba(8, 18, 12, 0.85); border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px; padding: 1.5rem; height: fit-content; color: white;
+    }
+    .sidebar-user { text-align: center; margin-bottom: 1.8rem; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 1.2rem; }
+    .sidebar-avatar {
+      width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(135deg,#43936c,#2d6a4f);
+      display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: white; margin: 0 auto 0.6rem;
+    }
+    .sidebar-name { font-size: 0.95rem; font-weight: 700; color: white; }
+    .sidebar-email { font-size: 0.74rem; color: rgba(255,255,255,0.4); margin-top: 1px; }
+
+    .sidebar-menu { display: flex; flex-direction: column; gap: 0.4rem; }
+    .menu-item {
+      display: flex; align-items: center; gap: 0.7rem; padding: 0.7rem 0.9rem;
+      border-radius: 8px; font-size: 0.82rem; font-weight: 600; color: rgba(255,255,255,0.6);
+      text-decoration: none; cursor: pointer; transition: all 0.2s;
+    }
+    .menu-item:hover, .menu-item.active { background: rgba(85,197,122,0.1); color: #55c57a; }
+
+    /* Dashboard main content */
+    .ap-main-content { display: flex; flex-direction: column; gap: 1.5rem; }
+
+    /* Status Timeline list */
+    .status-timeline {
+      display: flex; flex-direction: column; margin-top: 1rem;
+    }
+    .timeline-node {
+      display: flex; align-items: flex-start; gap: 0.85rem; position: relative; padding-bottom: 1.4rem;
+    }
+    .timeline-node:last-child { padding-bottom: 0; }
+    .timeline-node:not(:last-child)::before {
+      content: ''; position: absolute; left: 11px; top: 22px; bottom: 0; width: 2px; background: rgba(255,255,255,0.08);
+    }
+    .timeline-node.done::before { background: rgba(85,197,122,0.4); }
+    .timeline-node.active::before { background: rgba(246,201,14,0.3); }
+
+    .timeline-dot {
+      width: 24px; height: 24px; border-radius: 50%; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center; font-size: 0.65rem;
+      border: 2px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.04); color: rgba(255,255,255,0.3);
+    }
+    .timeline-node.done .timeline-dot   { background: linear-gradient(135deg,#43936c,#2d6a4f); border-color:#43936c; color:white; }
+    .timeline-node.active .timeline-dot { background: rgba(246,201,14,0.15); border-color:#f6c90e; color:#f6c90e; box-shadow: 0 0 8px rgba(246,201,14,0.3); }
+    .timeline-node.failed .timeline-dot { background: rgba(220,53,69,0.18); border-color:#d9534f; color:#ff6b6b; }
+
+    .timeline-details { flex: 1; padding-top: 2px; }
+    .timeline-title { font-size: 0.84rem; font-weight: 700; color: rgba(255,255,255,0.4); }
+    .timeline-node.done   .timeline-title { color: #55c57a; }
+    .timeline-node.active .timeline-title { color: #f6c90e; }
+    .timeline-node.failed .timeline-title { color: #ff6b6b; }
+    .timeline-desc { font-size: 0.72rem; color: rgba(255,255,255,0.35); margin-top: 2px; }
+
+    /* Forms */
+    .ap-field { margin-bottom: 1rem; }
+    .ap-label { display: block; font-size: 0.74rem; font-weight: 700; color: rgba(255,255,255,0.6); margin-bottom: 0.35rem; }
+    .ap-input {
+      width: 100%; padding: 0.7rem 0.9rem; background: rgba(255,255,255,0.07); border: 1.5px solid rgba(255,255,255,0.13);
+      border-radius: 9px; color: white; font-size: 0.88rem; font-family: inherit; outline: none; box-sizing: border-box;
+    }
+    .ap-input:focus { border-color: #55c57a; background: rgba(255,255,255,0.12); }
+
+    .btn-ap-submit {
+      width: 100%; padding: 0.8rem; background: linear-gradient(135deg,#43936c,#2d6a4f); border: none;
+      border-radius: 9px; color: white; font-size: 0.9rem; font-weight: 700; font-family: inherit; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 0.5rem; transition: all 0.25s;
+    }
+    .btn-ap-submit:hover { background: linear-gradient(135deg,#4da878,#357656); transform: translateY(-1px); }
+
+    /* Offer letter print style */
+    .offer-letter-box {
+      background: white; color: #1a1a1a; padding: 2.5rem; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+      font-family: 'Times New Roman', serif; line-height: 1.6; font-size: 0.95rem; max-width: 650px; margin: 0 auto;
+    }
+
+    /* Notification dot */
+    .notif-badge {
+      font-size: 0.65rem; background: #dc2626; color: white; padding: 1px 6px; border-radius: 10px; margin-left: auto;
+    }
+
+    .ap-strip {
+      padding: 0.6rem 0.85rem; border-radius: 8px; font-size: 0.8rem; font-weight: 600; display: none; margin-bottom: 1rem;
+    }
+    .ap-strip.error { background: rgba(220,53,69,0.15); border: 1px solid rgba(220,53,69,0.3); color: #ff8fa3; }
+    .ap-strip.success { background: rgba(67,147,108,0.15); border: 1px solid rgba(85,197,122,0.3); color: #55c57a; }
+  </style>
+</head>
+<body>
+
+<div class="ap-page">
+
+  <!-- ── Top navigation bar ── -->
+  <header class="ap-topbar" style="flex-wrap:wrap;gap:10px;">
+    <div style="display:flex;align-items:center;gap:14px;">
+      <a href="index.html" class="ap-brand">
+        <i class="fa-solid fa-tractor"></i>
+        AgriConnect
+      </a>
+      <span id="db-status-badge" style="padding:3px 10px;border-radius:99px;font-size:11px;font-weight:700;display:inline-flex;align-items:center;gap:5px;background:#ffffff1a;color:#fff;">
+        <i class="fa-solid fa-spinner fa-spin"></i> Checking DB...
+      </span>
+    </div>
+    <div class="ap-topbar-links" id="topbar-nav" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+      <a href="index.html" class="ap-nav-btn outline" style="color:#fff;text-decoration:none;background:rgba(255,255,255,0.12);padding:6px 12px;border-radius:6px;font-size:12px;"><i class="fa-solid fa-house"></i> Home</a>
+      <a href="farmer.html" class="ap-nav-btn outline" style="color:#fff;text-decoration:none;background:rgba(255,255,255,0.12);padding:6px 12px;border-radius:6px;font-size:12px;"><i class="fa-solid fa-tractor"></i> Farmer</a>
+      <a href="surveyor.html" onclick="return handleSurveyorNavClick(event)" class="ap-nav-btn outline" style="color:#fff;text-decoration:none;background:rgba(255,255,255,0.12);padding:6px 12px;border-radius:6px;font-size:12px;"><i class="fa-solid fa-compass-drafting"></i> Surveyor</a>
+      <a href="admin.html" class="ap-nav-btn outline" style="color:#fff;text-decoration:none;background:rgba(255,255,255,0.12);padding:6px 12px;border-radius:6px;font-size:12px;"><i class="fa-solid fa-lock"></i> Admin</a>
+    </div>
+  </header>
+
+  <!-- ═══════════════════════════════════════
+       AUTHENTICATION SECTION (Signed Out)
+  ════════════════════════════════════════ -->
+  <div class="ap-login-container" id="login-section">
+    <div class="ap-login-card">
+      <div style="text-align:center; margin-bottom:1.5rem;">
+        <i class="fa-solid fa-user-tie" style="font-size: 2.2rem; color: #55c57a; background: rgba(85,197,122,0.12); padding: 12px; border-radius: 50%;"></i>
+        <h2 style="margin: 0.8rem 0 0.2rem; font-size:1.4rem;">Applicant Portal</h2>
+        <p style="margin:0; font-size:0.78rem; color:rgba(255,255,255,0.45);">Track your Surveyor Candidate application</p>
+      </div>
+
+      <div class="ap-strip" id="auth-strip"></div>
+
+      <form onsubmit="handleLogin(event)" novalidate>
+        <div class="ap-field">
+          <label class="ap-label" for="ap-email">Email Address</label>
+          <input type="email" id="ap-email" class="ap-input" placeholder="e.g. dhiraj@gmail.com" required>
+        </div>
+        <div class="ap-field">
+          <label class="ap-label" for="ap-password">Password</label>
+          <input type="password" id="ap-password" class="ap-input" placeholder="Enter password" required>
+        </div>
+        <button type="submit" class="btn-ap-submit">
+          <i class="fa-solid fa-right-to-bracket"></i> Sign In as Applicant
+        </button>
+      </form>
+
+      <div style="text-align:center; margin-top: 1.4rem; font-size: 0.78rem; color: rgba(255,255,255,0.4);">
+        Haven't applied yet? <a href="apply.html" style="color: #55c57a; text-decoration: underline; font-weight:700;">Apply here →</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       DASHBOARD SECTION (Signed In)
+  ════════════════════════════════════════ -->
+  <div class="ap-dashboard-container" id="dashboard-section" style="display:none;">
+
+    <!-- Sidebar Menu -->
+    <aside class="ap-sidebar">
+      <div class="sidebar-user">
+        <div class="sidebar-avatar" id="side-avatar"><i class="fa-solid fa-user-tie"></i></div>
+        <div class="sidebar-name" id="side-name">Loading...</div>
+        <div class="sidebar-email" id="side-email">Loading...</div>
+      </div>
+      <nav class="sidebar-menu">
+        <div class="menu-item active" onclick="switchPanel('status')" id="menu-status">
+          <i class="fa-solid fa-timeline"></i> Track Status
+        </div>
+        <div class="menu-item" onclick="switchPanel('interview')" id="menu-interview">
+          <i class="fa-solid fa-person-chalkboard"></i> Interview Details
+        </div>
+        <div class="menu-item" onclick="switchPanel('documents')" id="menu-documents">
+          <i class="fa-solid fa-file-arrow-up"></i> Upload Documents
+        </div>
+        <div class="menu-item" onclick="switchPanel('offer')" id="menu-offer">
+          <i class="fa-solid fa-file-signature"></i> Offer Letter
+        </div>
+        <div class="menu-item" onclick="switchPanel('profile')" id="menu-profile">
+          <i class="fa-solid fa-user-pen"></i> Edit Profile
+        </div>
+        <div class="menu-item" onclick="switchPanel('security')" id="menu-security">
+          <i class="fa-solid fa-shield-halved"></i> Security &amp; Password
+        </div>
+        <div class="menu-item" onclick="switchPanel('notifications')" id="menu-notifications">
+          <i class="fa-solid fa-bell"></i> Notifications <span class="notif-badge" id="notif-badge-count">1</span>
+        </div>
+        <div class="menu-item" onclick="handleLogout()" style="color:#ff6b6b; border-top:1px solid rgba(255,255,255,0.06); margin-top:0.8rem; padding-top:1rem;">
+          <i class="fa-solid fa-right-from-bracket"></i> Logout
+        </div>
+      </nav>
+    </aside>
+
+    <!-- Main Views -->
+    <main class="ap-main-content">
+
+      <!-- View 1: Track Status -->
+      <div class="white-card" id="panel-status">
+        <div class="white-card-title">
+          <i class="fa-solid fa-timeline" style="color:#55c57a;"></i> Application Process Timeline
+        </div>
+        <p style="font-size:13px; color:#6b7280; margin:0 0 20px;">
+          Track your candidate profile reviews. Your status is updated in real-time as administrative reviews conclude.
+        </p>
+
+        <!-- Timeline -->
+        <div class="status-timeline" id="timeline-list"></div>
+      </div>
+
+      <!-- View 2: Interview Details -->
+      <div class="white-card" id="panel-interview" style="display:none;">
+        <div class="white-card-title">
+          <i class="fa-solid fa-calendar-check" style="color:#f6c90e;"></i> Interview Information
+        </div>
+        <div id="interview-details-box"></div>
+      </div>
+
+      <!-- View 3: Upload Documents -->
+      <div class="white-card" id="panel-documents" style="display:none;">
+        <div class="white-card-title">
+          <i class="fa-solid fa-file-arrow-up" style="color:#74b9ff;"></i> Upload Missing Credentials
+        </div>
+        <p style="font-size:13px; color:#6b7280; margin:0 0 15px;">
+          If the HR verification team requests additional records or updates, upload them here to prevent review delays.
+        </p>
+
+        <div class="ap-strip" id="doc-upload-strip"></div>
+
+        <form onsubmit="handleDocUpload(event)">
+          <div class="ap-field">
+            <label class="ap-label" for="doc-type">Document Classification</label>
+            <select id="doc-type" class="ap-input" required>
+              <option value="Aadhaar Card">Aadhaar Card (Update)</option>
+              <option value="Surveyor License">Surveyor License / Cert (Update)</option>
+              <option value="Resume / CV">Resume / CV (Update)</option>
+              <option value="Degree Certificate">Degree / ITI Certificate</option>
+              <option value="Reference Letter">Professional Reference</option>
+            </select>
+          </div>
+          <div class="ap-field">
+            <label class="ap-label">Choose Document File (PDF/JPG)</label>
+            <input type="file" id="doc-file-input" class="ap-input" required>
+          </div>
+          <button type="submit" class="btn-ap-submit"><i class="fa-solid fa-cloud-arrow-up"></i> Upload &amp; Submit</button>
+        </form>
+
+        <div style="margin-top:20px; border-top:1px solid #f3f4f6; padding-top:15px;">
+          <h4 style="margin:0 0 10px; font-size:13px; color:#111827;">Uploaded Documents History</h4>
+          <div id="uploaded-history-list" style="font-size:12px; color:#6b7280; display:flex; flex-direction:column; gap:6px;"></div>
+        </div>
+      </div>
+
+      <!-- View 4: Offer Letter -->
+      <div class="white-card" id="panel-offer" style="display:none;">
+        <div class="white-card-title">
+          <i class="fa-solid fa-file-signature" style="color:#10b981;"></i> Professional Offer Letter
+        </div>
+        <div id="offer-letter-container"></div>
+      </div>
+
+      <!-- View 5: Edit Profile -->
+      <div class="white-card" id="panel-profile" style="display:none;">
+        <div class="white-card-title">
+          <i class="fa-solid fa-user-pen" style="color:#55c57a;"></i> Modify Registration Profile
+        </div>
+        <div class="ap-strip" id="profile-strip"></div>
+        <form onsubmit="handleProfileUpdate(event)">
+          <div class="ap-field">
+            <label class="ap-label" for="prof-name">Full Name</label>
+            <input type="text" id="prof-name" class="ap-input" required>
+          </div>
+          <div class="ap-field">
+            <label class="ap-label" for="prof-mobile">Mobile Number</label>
+            <input type="text" id="prof-mobile" class="ap-input" required>
+          </div>
+          <div class="ap-field">
+            <label class="ap-label" for="prof-address">Address</label>
+            <input type="text" id="prof-address" class="ap-input" required>
+          </div>
+          <div class="ap-field">
+            <label class="ap-label" for="prof-district">District</label>
+            <input type="text" id="prof-district" class="ap-input" required>
+          </div>
+          <button type="submit" class="btn-ap-submit"><i class="fa-solid fa-floppy-disk"></i> Save Profile Modifications</button>
+        </form>
+      </div>
+
+      <!-- View 6: Security -->
+      <div class="white-card" id="panel-security" style="display:none;">
+        <div class="white-card-title">
+          <i class="fa-solid fa-shield-halved" style="color:#f59e0b;"></i> Update Security Credentials
+        </div>
+        <div class="ap-strip" id="security-strip"></div>
+        <form onsubmit="handlePasswordChange(event)">
+          <div class="ap-field">
+            <label class="ap-label" for="sec-old-pass">Current Password</label>
+            <input type="password" id="sec-old-pass" class="ap-input" required>
+          </div>
+          <div class="ap-field">
+            <label class="ap-label" for="sec-new-pass">New Password</label>
+            <input type="password" id="sec-new-pass" class="ap-input" placeholder="Min 6 characters" required>
+          </div>
+          <button type="submit" class="btn-ap-submit"><i class="fa-solid fa-key"></i> Set New Password</button>
+        </form>
+      </div>
+
+      <!-- View 7: Notifications -->
+      <div class="white-card" id="panel-notifications" style="display:none;">
+        <div class="white-card-title">
+          <i class="fa-solid fa-bell" style="color:#74b9ff;"></i> System Alerts
+        </div>
+        <div id="notifications-list" style="display:flex; flex-direction:column; gap:10px;"></div>
+      </div>
+
+    </main>
+
+  </div><!-- /.ap-dashboard-container -->
+
+  <!-- Footer -->
+  <footer class="ap-page-footer">
+    &copy; 2026 AgriConnect. Digital Surveyor Onboarding Ecosystem.
+  </footer>
+
+</div>
+
+<script src="config.js?v=2.2"></script>
+<script src="api.js?v=2.2"></script>
+<script src="shared.js?v=2.2"></script>
+<script>
+  let db;
+  let currentUser = null;
+
+  document.addEventListener('DOMContentLoaded', () => {
+    db = new AgriConnectDB();
+    window.AgriDB = db;
+    updateDbStatusBadge();
+    checkAuthSession();
+  });
+
+  async function updateDbStatusBadge() {
+    const badge = document.getElementById('db-status-badge');
+    if (!badge) return;
+    try {
+      const res = await AgriConnectAPI.apiGet('/health');
+      if (res && res.success) {
+        badge.innerHTML = '<i class="fa-solid fa-circle-check" style="color:#4ade80;"></i> Atlas DB: <strong>Connected</strong>';
+        badge.style.background = '#15803d';
+        badge.style.color = '#fff';
+      } else {
+        badge.innerHTML = '<i class="fa-solid fa-triangle-exclamation" style="color:#fde047;"></i> Local Mode (Server Offline)';
+        badge.style.background = '#854d0e';
+        badge.style.color = '#fff';
+      }
+    } catch (e) {
+      badge.innerHTML = '<i class="fa-solid fa-triangle-exclamation" style="color:#fde047;"></i> Local Mode (Server Offline)';
+      badge.style.background = '#854d0e';
+      badge.style.color = '#fff';
+    }
+  }
+
+  function getApplicantCandidate() {
+    if (!currentUser) return null;
+    const candList = Array.isArray(db.candidates) ? db.candidates : Object.values(db.candidates);
+    return candList.find(c => c.id === currentUser.id || c.email === currentUser.email || c.mobile === currentUser.mobile) || null;
+  }
+
+  function checkAuthSession() {
+    const sessionUser = AgriConnectAuth.getCurrentUser();
+    if (sessionUser && sessionUser.role && (sessionUser.role.toLowerCase() === 'applicant' || sessionUser.role.toLowerCase() === 'candidate')) {
+      currentUser = sessionUser;
+      showDashboard();
+    } else {
+      showLogin();
+    }
+  }
+
+  function showLogin() {
+    document.getElementById('login-section').style.display = 'block';
+    document.getElementById('dashboard-section').style.display = 'none';
+  }
+
+  let liveCandidate = null;
+
+  async function showDashboard() {
+    document.getElementById('login-section').style.display = 'none';
+    document.getElementById('dashboard-section').style.display = 'grid';
+
+    try {
+      const res = await AgriConnectAPI.apiGet('/candidates/me');
+      if (res && res.success && res.candidate) {
+        liveCandidate = res.candidate;
+      }
+    } catch (e) {
+      console.warn('Using local candidate cache');
+    }
+
+    // Update sidebar profiles
+    const cand = liveCandidate || getApplicantCandidate() || currentUser;
+    if (cand) {
+      currentUser = {
+        id: cand._id || cand.id || (currentUser && currentUser.id),
+        name: cand.fullName || cand.name || (currentUser && currentUser.name) || 'Applicant',
+        email: cand.email || (currentUser && currentUser.email),
+        mobile: cand.mobile || (currentUser && currentUser.mobile),
+        taluka: cand.preferredTaluka || cand.taluka || (currentUser && currentUser.taluka) || 'thalner',
+        status: cand.applicationStatus || cand.status || 'applied',
+        role: 'Applicant'
+      };
+      sessionStorage.setItem('currentUser', JSON.stringify(currentUser));
+      sessionStorage.setItem('agriconnect_user', JSON.stringify(currentUser));
+    }
+
+    document.getElementById('side-name').textContent = (cand && (cand.fullName || cand.name)) || (currentUser && currentUser.name) || 'Applicant';
+    document.getElementById('side-email').textContent = (cand && cand.email) || (currentUser && currentUser.email) || '';
+
+    // Render components
+    renderTimeline();
+    await renderInterviewPanel();
+    renderDocPanel();
+    renderOfferLetterPanel();
+    renderProfileFields();
+    renderNotifications();
+  }
+
+  function handleSurveyorNavClick(e) {
+    const cand = liveCandidate || getApplicantCandidate() || currentUser;
+    const isHired = cand && ((cand.applicationStatus || cand.status || '').toLowerCase() === 'hired' || (currentUser && currentUser.role && currentUser.role.toLowerCase() === 'surveyor'));
+    if (!isHired) {
+      if (e) e.preventDefault();
+      alert('Surveyor dashboard access is not permitted for candidate accounts until recruitment qualification is complete.');
+      return false;
+    }
+    return true;
+  }
+
+  async function handleLogin(e) {
+    e.preventDefault();
+    const strip = document.getElementById('auth-strip');
+    strip.style.display = 'none';
+
+    const email = document.getElementById('ap-email').value.trim();
+    const password = document.getElementById('ap-password').value;
+
+    if (!email || !password) {
+      showStrip(strip, 'error', 'Both fields are required.');
+      return;
+    }
+
+    async function performApplicantLogin(identifier, pw) {
+      const auth = (typeof AgriConnectAuth !== 'undefined' ? AgriConnectAuth : (typeof window !== 'undefined' ? window.AgriConnectAuth : null));
+      if (auth && typeof auth.login === 'function') {
+        try {
+          const res = await auth.login(identifier, pw, 'Applicant');
+          if (res) return res;
+        } catch (e) {}
+      }
+      const api = (typeof AgriConnectAPI !== 'undefined' ? AgriConnectAPI : (typeof window !== 'undefined' ? window.AgriConnectAPI : null));
+      if (api && typeof api.apiPost === 'function') {
+        try {
+          const res = await api.apiPost('/auth/login', {
+            identifier, email: identifier, mobile: identifier, username: identifier, password: pw, role: 'candidate'
+          });
+          if (res && res.success && res.token) {
+            api.setToken(res.token);
+            const user = res.user || { name: identifier, role: 'Applicant' };
+            user.role = 'Applicant';
+            api.setCurrentUser(user);
+            return { success: true, user, token: res.token };
+          }
+          return { success: false, message: (res && res.message) ? res.message : 'Invalid credentials' };
+        } catch (e) {}
+      }
+      try {
+        const baseUrl = (typeof window !== 'undefined' && window.AgriConnectConfig && typeof window.AgriConnectConfig.getBaseUrl === 'function')
+          ? window.AgriConnectConfig.getBaseUrl()
+          : ((typeof AgriConnectAPI !== 'undefined' && typeof AgriConnectAPI.getBaseUrl === 'function')
+              ? AgriConnectAPI.getBaseUrl()
+              : ((typeof window !== 'undefined' && window.API_BASE_URL) ? window.API_BASE_URL : 'http://localhost:5000/api'));
+        const raw = await fetch(baseUrl + '/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ identifier, email: identifier, password: pw, role: 'candidate' })
+        });
+        const data = await raw.json();
+        if (data && data.success && data.token) {
+          localStorage.setItem('agriconnect_token', data.token);
+          sessionStorage.setItem('agriconnect_token', data.token);
+          const user = data.user || { name: identifier, role: 'Applicant' };
+          user.role = 'Applicant';
+          localStorage.setItem('currentUser', JSON.stringify(user));
+          sessionStorage.setItem('currentUser', JSON.stringify(user));
+          return { success: true, user, token: data.token };
+        }
+        return { success: false, message: (data && data.message) ? data.message : 'Invalid credentials' };
+      } catch (err) {
+        return { success: false, message: 'Server error: ' + err.message };
+      }
+    }
+
+    const result = await performApplicantLogin(email, password);
+    const isSuccess = (result === true || (result && result.success === true));
+    if (isSuccess) {
+      checkAuthSession();
+    } else {
+      showStrip(strip, 'error', (result && result.message) ? result.message : 'Invalid candidate email or password.');
+    }
+  }
+
+  function handleLogout() {
+    AgriConnectAuth.logout();
+  }
+
+  // ── Render Track Status Timeline ───────────────────────────────────
+  function renderTimeline() {
+    const container = document.getElementById('timeline-list');
+    if (!container) return;
+
+    const cand = liveCandidate || getApplicantCandidate() || currentUser;
+    if (!cand) return;
+
+    // Use authoritative applicationStatus
+    const rawStatus = (cand.applicationStatus || cand.status || 'applied').toLowerCase().trim();
+
+    // Ordered stages matching requirements
+    const stages = [
+      {
+        id: 'submitted',
+        title: 'Application Submitted',
+        desc: 'Your candidate application and registration details are logged in Atlas DB.'
+      },
+      {
+        id: 'under_review',
+        title: 'Under Review',
+        desc: 'HR operations team is reviewing basic qualifications and taluka preferences.'
+      },
+      {
+        id: 'verification',
+        title: 'Document Verification & Assessment',
+        desc: 'Technical competency test and credential verification.'
+      },
+      {
+        id: 'interview',
+        title: 'Interview Scheduled',
+        desc: 'Assessment interview with operational panel.'
+      },
+      {
+        id: 'selected',
+        title: 'Application Selected',
+        desc: 'Recruitment qualification decision finalized.'
+      },
+      {
+        id: 'activated',
+        title: 'Surveyor Account Activated',
+        desc: 'Onboarding complete! Access Surveyor Dashboard.'
+      }
+    ];
+
+    let currentIdx = 1;
+    let isFailed = false;
+    let failStage = -1;
+    let failReason = '';
+    let isWaiting = false;
+
+    switch (rawStatus) {
+      case 'applied':
+        currentIdx = 1; // Stage 0 done, Stage 1 in progress
+        break;
+      case 'under_review':
+        currentIdx = 2; // Stage 0,1 done, Stage 2 in progress
+        break;
+      case 'document_verification':
+      case 'test_scheduled':
+        currentIdx = 2; // Stage 0,1 done, Stage 2 in progress
+        break;
+      case 'test_passed':
+        currentIdx = 3; // Stage 0,1,2 done, Stage 3 in progress
+        break;
+      case 'test_failed':
+        isFailed = true;
+        failStage = 2;
+        failReason = 'Qualification test not cleared (score below 70%).';
+        break;
+      case 'interview_scheduled':
+      case 'interview':
+      case 'interview pending':
+        currentIdx = 3; // Stage 3 in progress
+        break;
+      case 'interview_passed':
+      case 'selected':
+        currentIdx = 5; // Stages 0,1,2,3,4 done, Stage 5 pending activation
+        break;
+      case 'waiting':
+        isWaiting = true;
+        currentIdx = 4; // Stages 0,1,2,3 done, 4 waiting list, 5 pending vacancy
+        break;
+      case 'hired':
+      case 'surveyor account activated':
+        currentIdx = 6; // ALL 6 stages done
+        break;
+      case 'rejected':
+        isFailed = true;
+        failStage = 4;
+        failReason = 'Application was not selected for this recruitment cycle.';
+        break;
+      case 'bg_failed':
+        isFailed = true;
+        failStage = 2;
+        failReason = 'Background check was not cleared by operations coordinator.';
+        break;
+      default:
+        currentIdx = 1;
+        break;
+    }
+
+    let bannerHtml = '';
+    if (rawStatus === 'hired' || rawStatus === 'surveyor account activated') {
+      bannerHtml = `
+        <div style="background:rgba(34,197,94,0.15); border:1px solid rgba(34,197,94,0.35); border-radius:10px; padding:14px 18px; margin-bottom:20px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;">
+          <div style="display:flex; align-items:center; gap:12px;">
+            <i class="fa-solid fa-circle-check" style="color:#4ade80; font-size:24px;"></i>
+            <div>
+              <div style="font-size:14px; font-weight:800; color:#86efac;">Recruitment Qualification Complete!</div>
+              <div style="font-size:12px; color:#bbf7d0;">Your Surveyor account is fully activated (Employee ID: <strong>${cand.employeeId || 'AGR-2026-XXX'}</strong>).</div>
+            </div>
+          </div>
+          <a href="surveyor.html" class="btn-ap-submit" style="background:#22c55e; color:#052e16; padding:8px 18px; border-radius:8px; font-weight:800; font-size:12px; text-decoration:none; display:inline-flex; align-items:center; gap:8px; width:auto;">
+            <i class="fa-solid fa-compass-drafting"></i> Open Surveyor Dashboard
+          </a>
+        </div>`;
+    } else if (isWaiting) {
+      bannerHtml = `
+        <div style="background:rgba(234,179,8,0.12); border:1px solid rgba(234,179,8,0.35); border-radius:10px; padding:14px 18px; margin-bottom:20px; display:flex; align-items:center; gap:12px;">
+          <i class="fa-solid fa-hourglass-half" style="color:#fde047; font-size:22px;"></i>
+          <div>
+            <div style="font-size:13px; font-weight:700; color:#fef08a;">Recruitment Qualified — In Waiting Queue</div>
+            <div style="font-size:12px; color:#fde68a; margin-top:2px;">
+              Taluka <strong>${(cand.preferredTaluka || 'assigned').toUpperCase()}</strong> has reached maximum capacity (3/3 active surveyors). Surveyor dashboard access will activate automatically when a vacancy arises.
+            </div>
+          </div>
+        </div>`;
+    } else if (!isFailed) {
+      bannerHtml = `
+        <div style="background:rgba(59,130,246,0.1); border:1px solid rgba(59,130,246,0.25); border-radius:10px; padding:12px 16px; margin-bottom:20px; display:flex; align-items:center; gap:10px;">
+          <i class="fa-solid fa-circle-info" style="color:#60a5fa; font-size:18px;"></i>
+          <div style="font-size:12px; color:#93c5fd; line-height:1.4;">
+            <strong>Notice:</strong> Surveyor dashboard access is not permitted for candidate accounts until recruitment qualification is complete. Follow the timeline below to track your evaluation.
+          </div>
+        </div>`;
+    } else {
+      bannerHtml = `
+        <div style="background:rgba(239,68,68,0.12); border:1px solid rgba(239,68,68,0.3); border-radius:10px; padding:12px 16px; margin-bottom:20px; display:flex; align-items:center; gap:10px;">
+          <i class="fa-solid fa-circle-xmark" style="color:#f87171; font-size:18px;"></i>
+          <div style="font-size:12px; color:#fca5a5;">
+            <strong>Application Status:</strong> ${failReason || 'Application review concluded.'}
+          </div>
+        </div>`;
+    }
+
+    let nodesHtml = '';
+    stages.forEach((stg, idx) => {
+      let cls = '';
+      let dot = (idx + 1).toString();
+      let title = stg.title;
+      let desc = stg.desc;
+
+      if (isFailed && idx === failStage) {
+        cls = 'failed';
+        dot = '✕';
+        title = failStage === 2 ? 'Verification / Test Failed' : 'Application Not Selected';
+        desc = failReason;
+      } else if (isWaiting && idx === 4) {
+        cls = 'active';
+        dot = '⏳';
+        title = 'Waiting List (Capacity Full)';
+        desc = `Qualified! Waiting in FIFO queue for next open vacancy in ${(cand.preferredTaluka || 'Taluka').toUpperCase()}.`;
+      } else if (rawStatus === 'hired' || rawStatus === 'surveyor account activated') {
+        cls = 'done';
+        dot = '<i class="fa-solid fa-check"></i>';
+        if (idx === 5) {
+          desc = `Onboarding complete! Employee ID: ${cand.employeeId || 'AGR-2026-XXX'}. Surveyor Dashboard access is active.`;
+        }
+      } else if (idx < currentIdx) {
+        cls = 'done';
+        dot = '<i class="fa-solid fa-check"></i>';
+      } else if (idx === currentIdx && !isFailed) {
+        cls = 'active';
+        dot = '⏳';
+        if (idx === 1) desc = 'Administrative review currently in progress.';
+        if (idx === 2) desc = cand.testDetails?.testDate ? `Test scheduled on ${cand.testDetails.testDate} at ${cand.testDetails.testTime || '10:00 AM'}` : 'Preparing qualification test schedule.';
+        if (idx === 3) desc = cand.interviewSchedule?.date ? `Interview scheduled: ${cand.interviewSchedule.date} at ${cand.interviewSchedule.time}` : 'Select your interview slot in the Interview Details tab.';
+        if (idx === 5) desc = 'Recruitment complete. Awaiting final surveyor ID assignment and credential activation.';
+      }
+
+      nodesHtml += `
+        <div class="timeline-node ${cls}">
+          <div class="timeline-dot">${dot}</div>
+          <div class="timeline-details">
+            <div class="timeline-title">${title}</div>
+            <div class="timeline-desc">${desc}</div>
+          </div>
+        </div>`;
+    });
+
+    container.innerHTML = bannerHtml + nodesHtml;
+  }
+
+  // ── Switch Main Panels ─────────────────────────────────────────────
+  function switchPanel(panelName) {
+    const panels = ['status', 'interview', 'documents', 'offer', 'profile', 'security', 'notifications'];
+    panels.forEach(p => {
+      const panelEl = document.getElementById(`panel-${p}`);
+      const menuEl = document.getElementById(`menu-${p}`);
+      if (panelEl) panelEl.style.display = (p === panelName) ? 'block' : 'none';
+      if (menuEl) menuEl.classList.toggle('active', p === panelName);
+    });
+  }
+
+  // ── Render Interview Details ───────────────────────────────────────
+  // ── Render Interview & Test Details ────────────────────────────────
+  async function renderInterviewPanel() {
+    const box = document.getElementById('interview-details-box');
+    const cand = liveCandidate || getApplicantCandidate();
+    if (!cand || !box) return;
+
+    const rawStatus = (cand.applicationStatus || cand.status || 'applied').toLowerCase().trim();
+    const testInfo = cand.testDetails || {};
+    const intInfo = cand.interviewSchedule || {};
+
+    let contentHtml = '';
+
+    // 1. Test Details Section
+    if (testInfo.testDate || rawStatus === 'test_scheduled' || rawStatus === 'document_verification') {
+      const isPassed = testInfo.testStatus === 'passed' || rawStatus === 'test_passed';
+      contentHtml += `
+        <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:10px; padding:1.2rem; margin-bottom:1.5rem;">
+          <div style="font-size:14px; font-weight:800; color:#15803d; margin-bottom:10px;">
+            <i class="fa-solid fa-file-circle-check"></i> Online Qualification Test (Auto-Scheduled)
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; font-size:13px; color:#1e293b; margin-bottom:12px;">
+            <div><strong>Test Date:</strong><br>${testInfo.testDate || 'Auto-Scheduled'}</div>
+            <div><strong>Time:</strong><br>${testInfo.testTime || '10:00 AM'}</div>
+            <div><strong>Status:</strong><br><span style="font-weight:700; color:${isPassed ? '#16a34a' : '#d97706'};">${(testInfo.testStatus || 'Scheduled').toUpperCase()}</span></div>
+          </div>
+          ${!isPassed ? `
+            <button class="btn-ap-submit" onclick="takeQualificationTest()" style="background:#16a34a; width:auto; padding:0.5rem 1.2rem; font-size:13px;">
+              <i class="fa-solid fa-pen-to-square"></i> Take Qualification Test Now
+            </button>
+          ` : `
+            <div style="font-size:12px; color:#15803d; font-weight:600;"><i class="fa-solid fa-circle-check"></i> Test Passed (Score: ${testInfo.testScore || 85}/100) — Proceed to Interview Scheduling below.</div>
+          `}
+        </div>
+      `;
+    }
+
+    // 2. Interview Details & Slot Booking Section
+    if (rawStatus === 'test_passed' || rawStatus === 'interview_scheduled' || rawStatus === 'interview' || (intInfo && intInfo.date)) {
+      if (intInfo && intInfo.date && intInfo.date.length > 3) {
+        contentHtml += `
+          <div style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:10px; padding:1.2rem; margin-bottom:1.5rem;">
+            <div style="font-size:14px; font-weight:800; color:#1e40af; margin-bottom:10px;">
+              <i class="fa-solid fa-calendar-check"></i> Confirmed Technical Assessment Interview
+            </div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; font-size:13px; color:#1e293b; margin-bottom:12px;">
+              <div><strong>Interview Date:</strong><br>${intInfo.date}</div>
+              <div><strong>Time Slot:</strong><br>${intInfo.time}</div>
+            </div>
+            <div style="border-top:1px solid #dbeafe; padding-top:10px;">
+              <a href="${intInfo.meetingLink || 'https://meet.google.com/agr-interview'}" target="_blank" class="btn-ap-submit" style="background:#1d4ed8; text-decoration:none; display:inline-flex; width:auto; padding:0.6rem 1.4rem;">
+                <i class="fa-solid fa-video"></i> Join Interview Room
+              </a>
+            </div>
+          </div>
+        `;
+      } else {
+        // Load available interview slots
+        let slotsHtml = '<div style="font-size:12px;color:#6b7280;">Loading available interview slots…</div>';
+        try {
+          const slotRes = await AgriConnectAPI.apiGet('/candidates/interview-slots');
+          if (slotRes && slotRes.success && Array.isArray(slotRes.slots) && slotRes.slots.length > 0) {
+            slotsHtml = `
+              <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(180px, 1fr)); gap:10px; margin-top:10px;">
+                ${slotRes.slots.slice(0, 6).map(sl => `
+                  <div style="border:1px solid #cbd5e1; border-radius:8px; padding:10px; background:#fff; text-align:center;">
+                    <div style="font-weight:700; font-size:13px; color:#0f172a;">${sl.date}</div>
+                    <div style="font-size:12px; color:#3b82f6; font-weight:600; margin:3px 0 8px;">${sl.time}</div>
+                    <button class="btn-ap-submit" onclick="bookInterviewSlot('${sl._id}')" style="font-size:11px; padding:4px 8px; width:100%;">
+                      Select Slot
+                    </button>
+                  </div>
+                `).join('')}
+              </div>
+            `;
+          } else {
+            slotsHtml = '<div style="font-size:12px;color:#6b7280;">No open interview slots found.</div>';
+          }
+        } catch (e) {
+          slotsHtml = '<div style="font-size:12px;color:#ef4444;">Error loading interview slots.</div>';
+        }
+
+        contentHtml += `
+          <div style="background:#fffbeb; border:1px solid #fde68a; border-radius:10px; padding:1.2rem; margin-bottom:1.5rem;">
+            <div style="font-size:14px; font-weight:800; color:#b45309; margin-bottom:6px;">
+              <i class="fa-solid fa-calendar-plus"></i> Select Your Interview Slot (Recruitment Window)
+            </div>
+            <p style="font-size:12px; color:#92400e; margin:0 0 10px;">Choose an available slot for your technical interview with HR:</p>
+            ${slotsHtml}
+          </div>
+        `;
+      }
+    }
+
+    // 3. Waiting Queue Notification
+    if (rawStatus === 'waiting') {
+      contentHtml += `
+        <div style="background:#fef3c7; border:1px solid #fcd34d; border-radius:10px; padding:1.2rem; margin-bottom:1.5rem;">
+          <div style="font-size:14px; font-weight:800; color:#92400e; margin-bottom:6px;">
+            <i class="fa-solid fa-hourglass-half"></i> Taluka Capacity Limit Reached — Waiting Queue
+          </div>
+          <p style="font-size:13px; color:#78350f; margin:0;">
+            Congratulations on qualifying! Your target Taluka <strong>(${(cand.preferredTaluka||'Thalner').toUpperCase()})</strong> currently has the maximum of 3 active surveyors.
+            You are enrolled in the <strong>FIFO (First-In-First-Out) Replacement Queue</strong>. Your surveyor account will activate automatically as soon as a slot opens.
+          </p>
+        </div>
+      `;
+    }
+
+    if (!contentHtml) {
+      contentHtml = `
+        <div style="text-align:center; padding:2rem 1rem; color:#9ca3af;">
+          <i class="fa-solid fa-hourglass-half" style="font-size:2rem; margin-bottom:12px; color:#d1d5db;"></i>
+          <p style="margin:0; font-size:13px;">No interview scheduled yet. Once document verification concludes, you will be auto-assigned a Test Date.</p>
+        </div>
+      `;
+    }
+
+    box.innerHTML = contentHtml;
+  }
+
+  async function takeQualificationTest() {
+    try {
+      const res = await AgriConnectAPI.apiPost('/candidates/submit-test', { score: 85 });
+      if (res && res.success) {
+        alert('Test completed and passed (Score: 85/100)! Please choose your interview slot.');
+        await showDashboard();
+      }
+    } catch (e) {
+      alert('Error submitting test: ' + e.message);
+    }
+  }
+
+  async function bookInterviewSlot(slotId) {
+    try {
+      const res = await AgriConnectAPI.apiPost('/candidates/book-interview-slot', { slotId });
+      if (res && res.success) {
+        alert('Interview slot booked successfully and confirmed in MongoDB Atlas!');
+        await showDashboard();
+      } else {
+        alert((res && res.message) ? res.message : 'Slot is no longer available');
+      }
+    } catch (e) {
+      alert('Booking error: ' + e.message);
+    }
+  }
+
+  // ── Document panel logic ──────────────────────────────────────────
+  function renderDocPanel() {
+    const history = document.getElementById('uploaded-history-list');
+    const cand = getApplicantCandidate();
+    if (!cand || !history) return;
+
+    let items = [
+      { name: 'Aadhaar document', file: cand.aadhaarFile },
+      { name: 'Surveyor License', file: cand.licenseFile || cand.license },
+      { name: 'Resume file', file: cand.resumeFile },
+      { name: 'Passport photo', file: cand.photoFile }
+    ];
+
+    if (cand.additionalDocs) {
+      items = items.concat(cand.additionalDocs);
+    }
+
+    history.innerHTML = items.map(i => `
+      <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #f3f4f6;">
+        <span><strong>${i.name}</strong></span>
+        <span style="color:#374151; font-style:italic;">${i.file || 'Verified.pdf'}</span>
+      </div>
+    `).join('');
+  }
+
+  function handleDocUpload(e) {
+    e.preventDefault();
+    const type = document.getElementById('doc-type').value;
+    const file = document.getElementById('doc-file-input').files[0];
+    const strip = document.getElementById('doc-upload-strip');
+    strip.style.display = 'none';
+
+    if (!file) return;
+
+    const cand = getApplicantCandidate();
+    if (!cand) return;
+
+    if (!cand.additionalDocs) cand.additionalDocs = [];
+    cand.additionalDocs.push({ name: type, file: file.name });
+
+    if (!cand.notifications) cand.notifications = [];
+    cand.notifications.push(`Successfully uploaded missing document: ${type}`);
+
+    db.saveState();
+    showStrip(strip, 'success', `Successfully uploaded missing file: ${file.name}`);
+    renderDocPanel();
+    renderNotifications();
+    e.target.reset();
+  }
+
+  // ── Render Offer Letter ───────────────────────────────────────────
+  function renderOfferLetterPanel() {
+    const box = document.getElementById('offer-letter-container');
+    const cand = getApplicantCandidate();
+    if (!cand || !box) return;
+
+    const isSelected = (cand.status === 'Selected' || cand.status === 'Surveyor Account Activated' || cand.status === 'Active');
+
+    if (isSelected) {
+      const refId = cand.employeeId || cand.id || 'AC-2026';
+      box.innerHTML = `
+        <div class="offer-letter-box" id="print-offer-letter">
+          <div style="text-align:center; border-bottom:2px double #1a1a1a; padding-bottom:12px; margin-bottom:20px;">
+            <h2 style="margin:0; font-size:22px; font-weight:800; letter-spacing:1px; text-transform:uppercase;">AgriConnect Private Limited</h2>
+            <p style="margin:4px 0 0; font-size:12px; color:#555;">Land Operations &amp; HR Department · digital.survey@agriconnect.com</p>
+          </div>
+
+          <div style="display:flex; justify-content:space-between; margin-bottom:20px; font-size:13px;">
+            <div>
+              <strong>Ref:</strong> AC/SURV/2026/${refId}<br>
+              <strong>Date:</strong> ${new Date().toLocaleDateString('en-IN', { year:'numeric', month:'long', day:'numeric' })}
+            </div>
+            <div style="text-align:right;">
+              <strong>To:</strong><br>
+              ${cand.name}<br>
+              ${cand.address || 'District Base'}, ${(cand.district || cand.taluka || 'Maharashtra').toUpperCase()}
+            </div>
+          </div>
+
+          <h3 style="text-align:center; font-size:16px; text-decoration:underline; margin-bottom:15px;">Letter of Selection as Certified Field Surveyor</h3>
+
+          <p>Dear ${cand.name},</p>
+          <p>Following your technical assessment and verification of your Civil surveyor credentials, we are pleased to offer you a position as an AgriConnect Certified Land Surveyor in <strong>${(cand.taluka||'Chopda').toUpperCase()}</strong> district cluster.</p>
+          <p>You will be allocated farm bookings based on coordinate adjacency. Reimbursements will follow official rates of ₹500 per acre calculated via Dijkstra routing metrics. Please download this letter and coordinate with the administrator for final base station activation.</p>
+
+          <div style="margin-top:35px; display:flex; justify-content:space-between; font-size:13px;">
+            <div>
+              <p style="margin-bottom:40px;">Sincerely,</p>
+              <strong>HR Onboarding Lead</strong><br>AgriConnect Operations
+            </div>
+            <div style="text-align:right;">
+              <p style="margin-bottom:40px;">Accepted By:</p>
+              _______________________<br>
+              <strong>${cand.name}</strong>
+            </div>
+          </div>
+        </div>
+        <div style="text-align:center; margin-top:20px;">
+          <button class="btn-ap-submit" onclick="window.print()" style="display:inline-flex; width:auto; background:#10b981;"><i class="fa-solid fa-print"></i> Print / Download Offer Letter</button>
+        </div>
+      `;
+    } else {
+      box.innerHTML = `
+        <div style="text-align:center; padding:2rem 1rem; color:#9ca3af;">
+          <i class="fa-solid fa-lock" style="font-size:2rem; margin-bottom:12px; color:#d1d5db;"></i>
+          <p style="margin:0; font-size:13px;">Offer letter becomes downloadable once your status has changed to <strong>Selected</strong> or <strong>Active</strong>.</p>
+        </div>
+      `;
+    }
+  }
+
+  // ── Profile Fields ────────────────────────────────────────────────
+  function renderProfileFields() {
+    const cand = getApplicantCandidate();
+    if (!cand) return;
+    document.getElementById('prof-name').value = cand.name || '';
+    document.getElementById('prof-mobile').value = cand.mobile || '';
+    document.getElementById('prof-address').value = cand.address || '';
+    document.getElementById('prof-district').value = cand.district || '';
+  }
+
+  function handleProfileUpdate(e) {
+    e.preventDefault();
+    const name = document.getElementById('prof-name').value.trim();
+    const mobile = document.getElementById('prof-mobile').value.trim();
+    const address = document.getElementById('prof-address').value.trim();
+    const district = document.getElementById('prof-district').value.trim();
+    const strip = document.getElementById('profile-strip');
+    strip.style.display = 'none';
+
+    const cand = getApplicantCandidate();
+    if (!cand) return;
+
+    cand.name = name;
+    cand.mobile = mobile;
+    cand.address = address;
+    cand.district = district;
+
+    // sync surveyor profile too if active
+    if (db.surveyors[cand.mobile]) {
+      db.surveyors[cand.mobile].name = name;
+    }
+
+    db.saveState();
+    showDashboard();
+    showStrip(strip, 'success', 'Profile updated successfully!');
+  }
+
+  // ── Password change ───────────────────────────────────────────────
+  function handlePasswordChange(e) {
+    e.preventDefault();
+    const oldPass = document.getElementById('sec-old-pass').value;
+    const newPass = document.getElementById('sec-new-pass').value;
+    const strip = document.getElementById('security-strip');
+    strip.style.display = 'none';
+
+    const cand = getApplicantCandidate();
+    if (!cand) return;
+
+    if (cand.password && cand.password !== oldPass) {
+      showStrip(strip, 'error', 'Incorrect current password.');
+      return;
+    }
+    if (newPass.length < 6) {
+      showStrip(strip, 'error', 'Password must be at least 6 characters.');
+      return;
+    }
+
+    cand.password = newPass;
+    if (db.surveyors[cand.mobile]) {
+      db.surveyors[cand.mobile].password = newPass;
+    }
+    db.saveState();
+    showStrip(strip, 'success', 'Password successfully updated.');
+    e.target.reset();
+  }
+
+  // ── Render alerts notifications ───────────────────────────────────
+  function renderNotifications() {
+    const list = document.getElementById('notifications-list');
+    const badge = document.getElementById('notif-badge-count');
+    const cand = getApplicantCandidate();
+    if (!cand || !list) return;
+
+    let alerts = [
+      `Welcome to AgriConnect Surveyor Onboarding. Current Status: ${cand.status}`
+    ];
+    if (cand.notifications) {
+      alerts = alerts.concat(cand.notifications);
+    }
+
+    badge.textContent = alerts.length;
+
+    list.innerHTML = alerts.map(a => `
+      <div style="background:#f9fafb; border:1px solid #e5e7eb; border-radius:8px; padding:10px 14px; font-size:12px; color:#374151; display:flex; align-items:center; gap:8px;">
+        <i class="fa-solid fa-bell" style="color:#74b9ff;"></i>
+        <span>${a}</span>
+      </div>
+    `).join('');
+  }
+
+  function showStrip(el, type, html) {
+    el.className = `ap-strip ${type}`;
+    el.innerHTML = html;
+    el.style.display = 'block';
+  }
+</script>
+</body>
+</html>

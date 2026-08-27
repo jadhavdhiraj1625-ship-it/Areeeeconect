@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AgriConnect – Surveyor Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link rel="stylesheet" href="shared_styles.css" />
+  <style>
+    body { background: #07120a; }
+    .bg-farm-backdrop { background: #07120a; }
+    .surveyor-layout {
+      display: grid;
+      grid-template-columns: 350px 1fr;
+      gap: 24px;
+      align-items: start;
+    }
+    /* Avatar */
+    .surveyor-avatar {
+      width: 70px; height: 70px;
+      background: linear-gradient(135deg,#22c55e,#15803d);
+      border-radius: 50%; display: flex;
+      align-items: center; justify-content: center;
+      font-size: 30px; color: #fff; margin: 0 auto 16px; box-shadow: 0 4px 18px rgba(34,197,94,.3);
+    }
+    /* Star rating */
+    .star-row { display: flex; gap: 3px; margin: 6px 0; }
+    .star-filled { color: #f59e0b; }
+    .star-empty  { color: #d1d5db; }
+    /* Performance bar */
+    .perf-bar-wrap { margin: 10px 0; }
+    .perf-bar {
+      height: 8px; border-radius: 99px;
+      background: #e5e7eb; overflow: hidden; margin-top: 5px;
+    }
+    .perf-bar-fill {
+      height: 100%; border-radius: 99px;
+      background: linear-gradient(90deg,#22c55e,#16a34a);
+    }
+    /* Job card */
+    .job-card {
+      background: #f9fafb; border-radius: 14px;
+      padding: 18px; margin-bottom: 16px;
+      border: 1.5px solid #f3f4f6;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .job-card:hover { border-color: #bbf7d0; box-shadow: 0 4px 18px rgba(34,197,94,.08); }
+    .job-card-header {
+      display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;
+    }
+    .job-title { font-size: 16px; font-weight: 700; color: #111827; }
+    .job-meta  { font-size: 13px; color: #6b7280; margin: 3px 0; }
+    .job-actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+    /* Badges */
+    .badge-assigned  { background:#dbeafe; color:#1d4ed8; font-size:11px; font-weight:700; padding:3px 10px; border-radius:99px; }
+    .badge-accepted  { background:#ffedd5; color:#c2410c; font-size:11px; font-weight:700; padding:3px 10px; border-radius:99px; }
+    .badge-completed { background:#dcfce7; color:#15803d; font-size:11px; font-weight:700; padding:3px 10px; border-radius:99px; }
+    .badge-declined  { background:#fee2e2; color:#dc2626; font-size:11px; font-weight:700; padding:3px 10px; border-radius:99px; }
+    .badge-paid      { background:#dcfce7; color:#15803d; font-size:11px; font-weight:700; padding:3px 10px; border-radius:99px; }
+    .badge-unpaid    { background:#fee2e2; color:#dc2626; font-size:11px; font-weight:700; padding:3px 10px; border-radius:99px; }
+    /* Buttons */
+    .btn-accept {
+      background: linear-gradient(135deg,#22c55e,#16a34a); color:#fff;
+      border:none; border-radius:8px; padding:7px 16px;
+      font-size:12px; font-weight:700; cursor:pointer; font-family:inherit;
+      transition:opacity .2s;
+    }
+    .btn-accept:hover { opacity:.9; }
+    .btn-decline {
+      background:#fee2e2; color:#dc2626;
+      border:none; border-radius:8px; padding:7px 16px;
+      font-size:12px; font-weight:700; cursor:pointer; font-family:inherit;
+      transition:background .2s;
+    }
+    .btn-decline:hover { background:#fecaca; }
+    /* Status tag */
+    .status-available { background:#dcfce7; color:#15803d; font-size:11px; font-weight:700; padding:3px 10px; border-radius:99px; }
+    .status-busy      { background:#ffedd5; color:#c2410c; font-size:11px; font-weight:700; padding:3px 10px; border-radius:99px; }
+    /* Field report form */
+    .field-report-card {
+      background: #f0fdf4; border: 1.5px solid #bbf7d0;
+      border-radius: 14px; padding: 20px; margin-top: 16px;
+    }
+    .field-report-title {
+      font-size: 15px; font-weight: 700; color: #15803d;
+      margin-bottom: 14px; display: flex; align-items: center; gap: 8px;
+    }
+    .form-row { margin-bottom: 12px; }
+    .form-row label { display: block; font-size: 12px; font-weight: 600; color: #374151; margin-bottom: 4px; }
+    .form-row input, .form-row textarea {
+      width: 100%; padding: 9px 12px; border-radius: 8px;
+      border: 1.5px solid #d1d5db; font-size: 13px;
+      font-family: inherit; box-sizing: border-box;
+    }
+    .form-row input:focus, .form-row textarea:focus { outline: none; border-color: #22c55e; }
+    .form-row textarea { height: 75px; resize: vertical; }
+    .form-row-two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .btn-submit-report {
+      background: linear-gradient(135deg,#22c55e,#16a34a); color:#fff;
+      border: none; border-radius: 10px; padding: 11px 22px;
+      font-size: 13px; font-weight: 700; cursor: pointer;
+      font-family: inherit; transition: opacity .2s; width: 100%; margin-top: 6px;
+    }
+    .btn-submit-report:hover { opacity: .9; }
+    /* Empty state */
+    .empty-state { text-align: center; padding: 36px 16px; color: #9ca3af; font-size: 14px; }
+    .empty-state i { font-size: 40px; display: block; margin-bottom: 12px; }
+    /* Notification strip */
+    .notification-strip {
+      padding: 11px 15px; border-radius: 11px; margin-bottom: 14px;
+      font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 8px;
+    }
+    .notification-strip.success { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+    .notification-strip.error   { background: #fee2e2; color: #dc2626; border: 1px solid #fecaca; }
+    /* footer note */
+    .card-footer-note { font-size:11px; color:#9ca3af; margin-top:14px; border-top:1px solid #f3f4f6; padding-top:10px; }
+    /* Job summary highlight box */
+    .job-summary-box {
+      background: #fff; border-radius: 10px; padding: 12px 14px;
+      border: 1px solid #e5e7eb; font-size: 13px; margin-bottom: 14px;
+    }
+    .job-summary-box strong { display: block; font-size: 14px; color: #111827; margin-bottom: 6px; }
+    .job-summary-row { display: flex; justify-content: space-between; margin: 3px 0; color: #374151; }
+    @media (max-width: 900px) { .surveyor-layout { grid-template-columns: 1fr; } }
+
+    /* ── Recruitment Journey (Status Tracker) ── */
+    .journey-pipeline { display:flex; flex-direction:column; gap:0; margin-top:0.6rem; }
+    .jp-item {
+      display:flex; align-items:flex-start; gap:0.7rem;
+      position:relative; padding-bottom:0.9rem;
+    }
+    .jp-item:last-child { padding-bottom:0; }
+    .jp-item:not(:last-child)::before {
+      content:''; position:absolute; left:12px; top:25px; bottom:0; width:2px;
+      background:#e5e7eb;
+    }
+    .jp-item.jp-done::before  { background:rgba(34,197,94,0.4); }
+    .jp-item.jp-now::before   { background:rgba(234,179,8,0.35); }
+    .jp-dot {
+      width:26px; height:26px; border-radius:50%;
+      display:flex; align-items:center; justify-content:center;
+      font-size:0.65rem; font-weight:800; flex-shrink:0;
+      border:2px solid #e5e7eb; background:#f9fafb; color:#9ca3af;
+    }
+    .jp-item.jp-done .jp-dot  { background:linear-gradient(135deg,#22c55e,#15803d); border-color:#22c55e; color:white; }
+    .jp-item.jp-now  .jp-dot  { background:rgba(234,179,8,0.15); border-color:#eab308; color:#ca8a04; animation:jp-pulse 2s infinite; }
+    .jp-item.jp-fail .jp-dot  { background:rgba(239,68,68,0.15); border-color:#ef4444; color:#dc2626; }
+    @keyframes jp-pulse {
+      0%,100%{ box-shadow:0 0 0 3px rgba(234,179,8,0.15); }
+      50%    { box-shadow:0 0 0 7px rgba(234,179,8,0.0);  }
+    }
+    .jp-label { font-size:0.75rem; font-weight:700; color:#9ca3af; padding-top:3px; }
+    .jp-item.jp-done .jp-label { color:#15803d; }
+    .jp-item.jp-now  .jp-label { color:#ca8a04; }
+    .jp-item.jp-fail .jp-label { color:#dc2626; }
+    .jp-sub { font-size:0.67rem; color:#9ca3af; margin-top:1px; }
+    .jp-item.jp-done .jp-sub { color:rgba(21,128,61,0.7); }
+    .jp-item.jp-now  .jp-sub { color:rgba(202,138,4,0.8); }
+  </style>
+</head>
+<body class="bg-farm-backdrop">
+
+  <!-- ── HEADER ────────────────────────────────────────────── -->
+  <header class="dashboard-header-green" style="flex-wrap:wrap;gap:12px;">
+    <div>
+      <h1 style="margin:0;font-size:22px;font-weight:800;letter-spacing:-.3px;">
+        <i class="fa-solid fa-compass-drafting" style="margin-right:10px;opacity:.85;"></i>
+        Surveyor Field Dashboard
+      </h1>
+      <div style="display:flex;align-items:center;gap:10px;margin-top:3px;">
+        <p style="margin:0;font-size:13px;opacity:.85;font-weight:400;" id="header-welcome">Welcome!</p>
+        <span id="db-status-badge" style="padding:2px 9px;border-radius:99px;font-size:11px;font-weight:700;display:inline-flex;align-items:center;gap:5px;background:#ffffff22;color:#fff;">
+          <i class="fa-solid fa-spinner fa-spin"></i> Checking DB...
+        </span>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+      <a href="index.html" class="btn" style="color:#fff;text-decoration:none;background:rgba(255,255,255,0.18);padding:7px 14px;border-radius:8px;font-size:13px;font-weight:600;"><i class="fa-solid fa-house"></i> Home</a>
+      <a href="farmer.html" class="btn" style="color:#fff;text-decoration:none;background:rgba(255,255,255,0.18);padding:7px 14px;border-radius:8px;font-size:13px;font-weight:600;"><i class="fa-solid fa-tractor"></i> Farmer</a>
+      <a href="admin.html" class="btn" style="color:#fff;text-decoration:none;background:rgba(255,255,255,0.18);padding:7px 14px;border-radius:8px;font-size:13px;font-weight:600;"><i class="fa-solid fa-lock"></i> Admin</a>
+      <a href="applicant.html" class="btn" style="color:#fff;text-decoration:none;background:rgba(255,255,255,0.18);padding:7px 14px;border-radius:8px;font-size:13px;font-weight:600;"><i class="fa-solid fa-user-tie"></i> Applicant</a>
+      <button class="btn-header-logout" onclick="AgriConnectAuth.logout()">
+        <i class="fa-solid fa-arrow-right-from-bracket"></i> Logout
+      </button>
+    </div>
+  </header>
+
+  <!-- ── MAIN ──────────────────────────────────────────────── -->
+  <main style="max-width:1200px;margin:0 auto;padding:28px 20px 60px;">
+    <div id="page-notification" style="display:none;" class="notification-strip"></div>
+
+    <div class="surveyor-layout">
+      <!-- ── LEFT ── -->
+      <div>
+        <!-- Profile Card -->
+        <div class="white-card" style="margin-bottom:22px;" id="profile-card">
+          <div style="text-align:center;margin-bottom:16px;">
+            <div class="surveyor-avatar"><i class="fa-solid fa-user-tie"></i></div>
+            <div id="profile-name" style="font-size:18px;font-weight:800;color:#111827;"></div>
+            <div id="profile-empid" style="font-size:12px;color:#6b7280;margin-top:2px;"></div>
+          </div>
+          <div id="profile-fields"></div>
+          <div class="card-footer-note">
+            <i class="fa-solid fa-location-crosshairs" style="margin-right:5px;color:#22c55e;"></i>
+            Ensure GPS coordinates are verified before uploading reports.
+          </div>
+        </div>
+
+        <!-- Performance Card -->
+        <div class="white-card" id="performance-card">
+          <div class="white-card-title">
+            <i class="fa-solid fa-chart-line" style="color:#22c55e;"></i>
+            Performance Summary
+          </div>
+          <div id="performance-content"></div>
+        </div>
+
+        <!-- My Recruitment Journey Card -->
+        <div class="white-card" id="recruitment-journey-card">
+          <div class="white-card-title">
+            <i class="fa-solid fa-timeline" style="color:#60a5fa;"></i>
+            My Recruitment Journey
+          </div>
+          <div id="journey-pipeline" class="journey-pipeline">
+            <div style="font-size:0.78rem;color:#9ca3af;font-style:italic;">Loading your application status…</div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ── RIGHT ── -->
+      <div>
+        <!-- Active Assignments -->
+        <div class="white-card">
+          <div class="white-card-title">
+            <i class="fa-solid fa-briefcase" style="color:#22c55e;"></i>
+            Active Job Assignments
+          </div>
+          <p style="font-size:13px;color:#6b7280;margin:0 0 16px;">
+            Review, accept, or decline new survey bookings assigned to you.
+          </p>
+          <div id="jobs-list"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="config.js?v=2.2"></script>
+  <script src="api.js?v=2.2"></script>
+  <script src="shared.js?v=2.2"></script>
+  <script>
+    let db;
+    let currentUser;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      currentUser = AgriConnectAuth.checkSession('Surveyor');
+      if (!currentUser) return;
+
+      db = new AgriConnectDB();
+      window.AgriDB = db;
+
+      updateDbStatusBadge();
+
+      // Re-sync currentUser from db to pick up any live changes
+      if (db.surveyors[currentUser.mobile]) {
+        currentUser = { ...db.surveyors[currentUser.mobile], role: 'Surveyor', id: db.surveyors[currentUser.mobile].id || db.surveyors[currentUser.mobile].emp_id || currentUser.id };
+        sessionStorage.setItem('currentUser', JSON.stringify(currentUser));
+        sessionStorage.setItem('agriconnect_user', JSON.stringify(currentUser));
+      }
+
+      document.getElementById('header-welcome').textContent = `Welcome, ${currentUser.name || 'Surveyor'}!`;
+      renderProfile();
+      renderPerformance();
+      renderJobs();
+      renderRecruitmentJourney();
+    });
+
+    async function updateDbStatusBadge() {
+      const badge = document.getElementById('db-status-badge');
+      if (!badge) return;
+      try {
+        const res = await AgriConnectAPI.apiGet('/health');
+        if (res && res.success) {
+          badge.innerHTML = '<i class="fa-solid fa-circle-check" style="color:#4ade80;"></i> Atlas DB: <strong>Connected</strong>';
+          badge.style.background = '#15803d';
+          badge.style.color = '#fff';
+        } else {
+          badge.innerHTML = '<i class="fa-solid fa-triangle-exclamation" style="color:#fde047;"></i> Local Mode (Server Offline)';
+          badge.style.background = '#854d0e';
+          badge.style.color = '#fff';
+        }
+      } catch (e) {
+        badge.innerHTML = '<i class="fa-solid fa-triangle-exclamation" style="color:#fde047;"></i> Local Mode (Server Offline)';
+        badge.style.background = '#854d0e';
+        badge.style.color = '#fff';
+      }
+    }
+
+    // ── Profile ───────────────────────────────────────────────
+    function renderProfile() {
+      document.getElementById('profile-name').textContent = currentUser.name;
+      document.getElementById('profile-empid').textContent = currentUser.emp_id || currentUser.employeeId || currentUser.id || '';
+
+      const rawStatus = (currentUser.status || 'available').toLowerCase();
+      const statusCls = rawStatus === 'available' ? 'status-available' : (rawStatus === 'resigned' ? 'status-declined' : 'status-busy');
+
+      document.getElementById('profile-fields').innerHTML = `
+        ${pRow('Base Station', currentUser.baseStation || currentUser.node || 'Chopda')}
+        ${pRow('Taluka', capitalize(currentUser.taluka || 'chopda'))}
+        ${pRow('Status', `<span class="${statusCls}">${capitalize(currentUser.status || 'Available')}</span>`)}
+        ${pRow('Rating', `${starDisplay(currentUser.rating || 4.8)} <span style="font-size:12px;color:#6b7280;margin-left:4px;">${currentUser.rating || 4.8}</span>`)}
+        ${pRow('Jobs Completed', currentUser.jobsCompleted || 0)}
+        <div style="margin-top:12px;display:flex;gap:8px;flex-direction:column;">
+          <div style="display:flex;gap:6px;">
+            <button class="btn-dash-green" onclick="handleStatusChange('available')" style="flex:1;padding:6px 8px;font-size:11px;">
+              <i class="fa-solid fa-check"></i> Available
+            </button>
+            <button class="btn-dash-green" onclick="handleStatusChange('inactive')" style="flex:1;padding:6px 8px;font-size:11px;background:#f59e0b;">
+              <i class="fa-solid fa-pause"></i> Inactive
+            </button>
+            <button class="btn-dash-green" onclick="handleStatusChange('resigned')" style="flex:1;padding:6px 8px;font-size:11px;background:#ef4444;">
+              <i class="fa-solid fa-arrow-right-from-bracket"></i> Resign
+            </button>
+          </div>
+          <button class="btn-book-blue" onclick="showTransferModal()" style="width:100%;padding:6px 10px;font-size:12px;">
+            <i class="fa-solid fa-right-left"></i> Request Taluka Transfer
+          </button>
+        </div>
+      `;
+    }
+
+    async function handleStatusChange(newStatus) {
+      if (newStatus === 'resigned' && !confirm('Are you sure you want to permanently resign? This will release your position to the next qualified candidate in the waiting queue.')) {
+        return;
+      }
+      try {
+        const survId = currentUser._id || currentUser.id || 'me';
+        const res = await AgriConnectAPI.apiPut(`/surveyors/${survId}/status`, { status: newStatus });
+        if (res && res.success) {
+          alert('Status updated to: ' + newStatus);
+          currentUser.status = newStatus;
+          renderProfile();
+        } else {
+          alert((res && res.message) ? res.message : 'Error updating status');
+        }
+      } catch (e) {
+        alert('Error: ' + e.message);
+      }
+    }
+
+    async function showTransferModal() {
+      const target = prompt('Enter destination Taluka (e.g. jamner, pachora, chopda, thalner, shirpur, jalgaon):');
+      if (!target) return;
+      const reason = prompt('Enter reason for transfer:') || 'Relocation';
+
+      try {
+        const res = await AgriConnectAPI.apiPost('/surveyors/transfer-request', { targetTaluka: target, reason });
+        if (res && res.success) {
+          alert('Transfer request submitted to Admin successfully! Pending capacity review.');
+        } else {
+          alert((res && res.message) ? res.message : 'Error submitting transfer request');
+        }
+      } catch (e) {
+        alert('Error: ' + e.message);
+      }
+    }
+
+    function pRow(label, val) {
+      return `<div class="profile-field-row">
+        <span class="profile-field-label">${label}</span>
+        <span class="profile-field-val">${val}</span>
+      </div>`;
+    }
+
+    // ── Performance ───────────────────────────────────────────
+    function renderPerformance() {
+      const rating = currentUser.rating || 4.8;
+      const jobs   = currentUser.jobsCompleted || 0;
+      const jobPct = Math.min(100, Math.round((jobs / 20) * 100));
+
+      document.getElementById('performance-content').innerHTML = `
+        <div style="margin-bottom:14px;">
+          <div style="display:flex;justify-content:space-between;font-size:13px;font-weight:600;color:#374151;margin-bottom:5px;">
+            <span>Surveyor Rating</span>
+            <span>${rating} / 5.0</span>
+          </div>
+          <div style="font-size:24px;">${starDisplay(rating)}</div>
+        </div>
+        <div>
+          <div style="display:flex;justify-content:space-between;font-size:13px;font-weight:600;color:#374151;margin-bottom:5px;">
+            <span>Jobs Completed</span>
+            <span>${jobs}</span>
+          </div>
+          <div class="perf-bar">
+            <div class="perf-bar-fill" style="width:${jobPct}%;"></div>
+          </div>
+          <div style="font-size:11px;color:#9ca3af;margin-top:4px;">Target: 20 jobs</div>
+        </div>
+      `;
+    }
+
+    // ── Jobs ──────────────────────────────────────────────────
+    async function renderJobs() {
+      const container = document.getElementById('jobs-list');
+
+      let myJobs = [];
+      try {
+        const res = await AgriConnectAPI.apiGet('/bookings');
+        if (res && res.success && Array.isArray(res.bookings)) {
+          myJobs = res.bookings.map(b => ({
+            id: b._id,
+            surveyorMobile: (b.surveyorId && b.surveyorId.userId && b.surveyorId.userId.mobile) ? b.surveyorId.userId.mobile : currentUser.mobile,
+            farmerName: b.farmerId ? b.farmerId.name : 'Farmer',
+            farmName: b.farmId ? b.farmId.farmName : (b.surveyType || 'Survey Plot'),
+            surveyType: b.surveyType || 'Boundary Tally',
+            location: (b.farmId && b.farmId.location && b.farmId.location.address) ? b.farmId.location.address : (b.farmId ? b.farmId.village : 'Local Plot'),
+            area: b.area,
+            cost: b.cost,
+            distance: b.distance,
+            status: b.status,
+            paymentStatus: b.status === 'Paid' ? 'Paid' : 'Unpaid',
+            scheduleDate: b.appointmentDate,
+            scheduleTime: b.appointmentTime,
+            instructions: b.preparationInstructions
+          }));
+        }
+      } catch (e) {
+        console.warn('API error retrieving surveyor jobs, using local fallback');
+      }
+
+      if (!myJobs.length) {
+        myJobs = db.bookings.filter(b =>
+          (b.surveyorMobile === currentUser.mobile || (currentUser.emp_id && b.surveyorMobile === currentUser.emp_id)) &&
+          ['Assigned', 'Accepted', 'Completed'].includes(b.status)
+        );
+      }
+
+      if (!myJobs.length) {
+        container.innerHTML = `<div class="empty-state">
+          <i class="fa-solid fa-inbox"></i>
+          No active assignments. You will be notified when a farmer books you.
+        </div>`;
+        return;
+      }
+
+      container.innerHTML = myJobs.map(b => renderJobCard(b)).join('');
+    }
+
+    function renderJobCard(b) {
+      let badgeHtml = '';
+      let actionsHtml = '';
+
+      if (b.status === 'Assigned') {
+        badgeHtml = `<span class="badge-assigned">Assigned</span>`;
+        actionsHtml = `
+          <div class="job-actions" id="actions-${b.id}">
+            <button class="btn-accept" onclick="showScheduleForm('${b.id}')">
+              <i class="fa-solid fa-circle-check"></i> Accept &amp; Schedule
+            </button>
+            <button class="btn-decline" onclick="respondJob('${b.id}', false)">
+              <i class="fa-solid fa-circle-xmark"></i> Decline
+            </button>
+          </div>
+          <form id="schedule-form-${b.id}" class="schedule-form" style="display:none; margin-top:12px; background:rgba(0,0,0,0.03); padding:10px; border-radius:8px; border:1px solid #e5e7eb;" onsubmit="submitSchedule(event, '${b.id}')">
+             <div class="form-row-two" style="display:flex;gap:10px;">
+               <div style="flex:1"><label style="font-size:11px;font-weight:600;">Date</label><input type="date" name="sDate" required class="dash-input" style="padding:6px;width:100%;box-sizing:border-box;"></div>
+               <div style="flex:1"><label style="font-size:11px;font-weight:600;">Time</label><input type="time" name="sTime" required class="dash-input" style="padding:6px;width:100%;box-sizing:border-box;"></div>
+             </div>
+             <div style="margin-top:8px;">
+               <label style="font-size:11px;font-weight:600;">Instructions for Farmer</label>
+               <input type="text" name="sInst" placeholder="e.g. Keep 7/12 extract ready" required class="dash-input" style="padding:6px;width:100%;box-sizing:border-box;">
+             </div>
+             <button type="submit" class="btn-accept" style="width:100%; margin-top:10px;"><i class="fa-solid fa-calendar-check"></i> Confirm Appointment</button>
+          </form>`;
+      } else if (b.status === 'Accepted') {
+        badgeHtml = `<span class="badge-accepted"><i class="fa-solid fa-circle-dot"></i> In Progress</span>`;
+        actionsHtml = renderFieldReportForm(b);
+      } else if (b.status === 'Completed') {
+        badgeHtml = `<span class="badge-completed"><i class="fa-solid fa-circle-check"></i> Completed</span>`;
+        const payBadge = b.paymentStatus === 'Paid'
+          ? `<span class="badge-paid">Paid</span>`
+          : `<span class="badge-unpaid">Unpaid</span>`;
+        actionsHtml = `<div style="margin-top:10px;display:flex;gap:8px;">${payBadge}</div>`;
+      }
+
+      return `
+        <div class="job-card">
+          <div class="job-card-header">
+            <div>
+              <div class="job-title">${b.farmName || 'Survey Job'}</div>
+              <div class="job-meta" style="color:#3b82f6;font-weight:600;"><i class="fa-solid fa-briefcase" style="margin-right:4px;"></i>Task: ${b.surveyType || 'Standard Survey'}</div>
+              <div class="job-meta"><i class="fa-solid fa-location-dot" style="color:#22c55e;margin-right:4px;"></i>${b.location || 'N/A'}</div>
+              <div class="job-meta"><i class="fa-solid fa-user" style="color:#6b7280;margin-right:4px;"></i>Farmer: ${b.farmerName}</div>
+              <div class="job-meta"><i class="fa-solid fa-ruler-combined" style="margin-right:4px;color:#6b7280;"></i>${b.area} acres · ₹${(b.cost||0).toLocaleString('en-IN')}</div>
+            </div>
+            <div>${badgeHtml}</div>
+          </div>
+          ${actionsHtml}
+        </div>`;
+    }
+
+    function renderFieldReportForm(b) {
+      return `
+        <div class="field-report-card">
+          <div class="field-report-title">
+            <i class="fa-solid fa-file-signature"></i>
+            Field Report Upload
+          </div>
+          <div class="job-summary-box">
+            <strong>Job Summary</strong>
+            <div class="job-summary-row"><span>Farmer</span><span>${b.farmerName}</span></div>
+            <div class="job-summary-row"><span>Farm Name</span><span>${b.farmName}</span></div>
+            <div class="job-summary-row"><span>Area</span><span>${b.area} acres</span></div>
+            <div class="job-summary-row"><span>Distance</span><span>${b.distance || 'N/A'} km</span></div>
+            <div class="job-summary-row"><span>Est. Travel Time</span><span>${b.distance ? Math.ceil(b.distance / 30) + ' hrs' : 'N/A'}</span></div>
+          </div>
+          <form id="field-report-form-${b.id}" onsubmit="submitFieldReport(event, '${b.id}')">
+            <div class="form-row-two">
+              <div class="form-row">
+                <label>GPS Latitude</label>
+                <input type="number" step="0.0001" name="lat" value="18.5204" placeholder="e.g. 18.5204" required />
+              </div>
+              <div class="form-row">
+                <label>GPS Longitude</label>
+                <input type="number" step="0.0001" name="lng" value="73.8567" placeholder="e.g. 73.8567" required />
+              </div>
+            </div>
+            <div class="form-row">
+              <label>Verified Acreage</label>
+              <input type="number" step="0.01" name="acreage" value="${b.area}" placeholder="Enter verified area in acres" required />
+            </div>
+            <div class="form-row">
+              <label>Boundary Observations</label>
+              <textarea name="observations" placeholder="Describe boundary conditions, landmarks, any discrepancies…" required></textarea>
+            </div>
+            <button type="submit" class="btn-submit-report">
+              <i class="fa-solid fa-upload" style="margin-right:8px;"></i>Upload &amp; Sign Survey Report
+            </button>
+          </form>
+        </div>`;
+    }
+
+    function showScheduleForm(id) {
+      document.getElementById('actions-'+id).style.display = 'none';
+      document.getElementById('schedule-form-'+id).style.display = 'block';
+    }
+
+    async function submitSchedule(e, id) {
+      e.preventDefault();
+      const form = e.target;
+      const sDate = form.sDate.value;
+      const sTime = form.sTime.value;
+      const sInst = form.sInst.value;
+
+      let formattedTime = sTime;
+      if (sTime && sTime.includes(':') && !sTime.includes('AM') && !sTime.includes('PM')) {
+        const [hStr, mStr] = sTime.split(':');
+        let h = parseInt(hStr, 10);
+        const m = mStr || '00';
+        const ampm = h >= 12 ? 'PM' : 'AM';
+        h = h % 12;
+        if (h === 0) h = 12;
+        formattedTime = `${h.toString().padStart(2, '0')}:${m} ${ampm}`;
+      }
+
+      try {
+        await AgriConnectAPI.apiPut(`/bookings/${id}/status`, {
+          status: 'Accepted',
+          appointmentDate: sDate,
+          appointmentTime: formattedTime,
+          preparationInstructions: sInst
+        });
+      } catch (err) {
+        console.warn('API error during submitSchedule:', err);
+      }
+
+      const booking = db.bookings.find(b => b.id === id);
+      const surveyor = db.surveyors[currentUser.mobile];
+      if (booking) {
+        booking.scheduleDate = sDate;
+        booking.scheduleTime = formattedTime;
+        booking.instructions = sInst;
+        booking.status = 'Accepted';
+      }
+      if (surveyor) {
+        surveyor.status = 'Busy';
+      }
+      
+      sessionStorage.setItem('currentUser', JSON.stringify({ ...surveyor, role: 'Surveyor', id: surveyor?.id || surveyor?.emp_id }));
+      sessionStorage.setItem('agriconnect_user', JSON.stringify({ ...surveyor, role: 'Surveyor', id: surveyor?.id || surveyor?.emp_id }));
+      currentUser = { ...surveyor, role: 'Surveyor', id: surveyor?.id || surveyor?.emp_id };
+
+      db.saveState();
+      showNotification('Appointment Scheduled in Atlas DB!', 'success');
+      renderProfile();
+      await renderJobs();
+    }
+
+    async function respondJob(bookingId, accept) {
+      if (!accept) {
+        try {
+          await AgriConnectAPI.apiPut(`/bookings/${bookingId}/status`, { status: 'Cancelled' });
+        } catch (err) {
+          console.warn('API error during job decline:', err);
+        }
+
+        const booking = db.bookings.find(b => b.id === bookingId);
+        const surveyor = db.surveyors[currentUser.mobile];
+        if (booking) booking.status = 'Declined';
+        if (surveyor) surveyor.status = 'Available';
+
+        sessionStorage.setItem('currentUser', JSON.stringify({ ...surveyor, role: 'Surveyor', id: surveyor?.id || surveyor?.emp_id }));
+        sessionStorage.setItem('agriconnect_user', JSON.stringify({ ...surveyor, role: 'Surveyor', id: surveyor?.id || surveyor?.emp_id }));
+        currentUser = { ...surveyor, role: 'Surveyor', id: surveyor?.id || surveyor?.emp_id };
+
+        db.saveState();
+        showNotification('Job declined. You are now available for new assignments.', 'error');
+        renderProfile();
+        renderPerformance();
+        await renderJobs();
+      }
+    }
+
+    function generateMapImage(type) {
+      const canvas = document.createElement('canvas');
+      canvas.width = 600; canvas.height = 400;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#e8f5e9'; ctx.fillRect(0, 0, 600, 400);
+      ctx.strokeStyle = 'rgba(0,0,0,0.05)'; ctx.lineWidth = 1;
+      for(let i=0; i<600; i+=20) { ctx.beginPath(); ctx.moveTo(i,0); ctx.lineTo(i,400); ctx.stroke(); }
+      for(let i=0; i<400; i+=20) { ctx.beginPath(); ctx.moveTo(0,i); ctx.lineTo(600,i); ctx.stroke(); }
+      ctx.strokeStyle = '#22c55e'; ctx.lineWidth = 4;
+      ctx.fillStyle = 'rgba(34,197,94,0.2)';
+      if (type && type.includes('Subdivision')) {
+        ctx.beginPath(); ctx.rect(100, 80, 400, 240); ctx.fill(); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(233, 80); ctx.lineTo(233, 320); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(366, 80); ctx.lineTo(366, 320); ctx.stroke();
+        ctx.fillStyle = '#16a34a'; ctx.font = 'bold 20px Outfit';
+        ctx.fillText('Part A', 140, 210); ctx.fillText('Part B', 270, 210); ctx.fillText('Part C', 410, 210);
+      } else {
+        ctx.beginPath(); ctx.moveTo(150, 80); ctx.lineTo(450, 110); ctx.lineTo(480, 320); ctx.lineTo(120, 350);
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#ef4444';
+        ctx.beginPath(); ctx.arc(150,80, 8, 0, 2*Math.PI); ctx.fill();
+        ctx.beginPath(); ctx.arc(450,110, 8, 0, 2*Math.PI); ctx.fill();
+        ctx.beginPath(); ctx.arc(480,320, 8, 0, 2*Math.PI); ctx.fill();
+        ctx.beginPath(); ctx.arc(120,350, 8, 0, 2*Math.PI); ctx.fill();
+        ctx.fillStyle = '#16a34a'; ctx.font = 'bold 22px Outfit';
+        ctx.fillText('Verified Boundary', 200, 220);
+      }
+      return canvas.toDataURL('image/png');
+    }
+
+    async function submitFieldReport(e, bookingId) {
+      e.preventDefault();
+      const form = e.target;
+      const booking = db.bookings.find(b => b.id === bookingId);
+      const sType = (booking && booking.surveyType) ? booking.surveyType : 'Boundary Tally';
+      
+      const reportData = {
+        lat: form.lat.value,
+        lng: form.lng.value,
+        acreage: form.acreage.value,
+        observations: form.observations.value,
+        mapImage: generateMapImage(sType),
+        submittedAt: new Date().toISOString()
+      };
+
+      try {
+        await AgriConnectAPI.apiPut(`/bookings/${bookingId}/status`, {
+          status: 'Completed',
+          report: reportData
+        });
+      } catch (err) {
+        console.warn('API error during submitFieldReport:', err);
+      }
+
+      const surveyor = db.surveyors[currentUser.mobile];
+
+      if (booking) {
+        booking.report = reportData;
+        booking.status = 'Completed';
+      }
+
+      if (surveyor) {
+        surveyor.status = 'Available';
+        surveyor.jobsCompleted = (surveyor.jobsCompleted || 0) + 1;
+      }
+
+      sessionStorage.setItem('currentUser', JSON.stringify({ ...surveyor, role: 'Surveyor', id: surveyor?.id || surveyor?.emp_id }));
+      sessionStorage.setItem('agriconnect_user', JSON.stringify({ ...surveyor, role: 'Surveyor', id: surveyor?.id || surveyor?.emp_id }));
+      currentUser = { ...surveyor, role: 'Surveyor', id: surveyor?.id || surveyor?.emp_id };
+
+      db.saveState();
+      showNotification('Survey report saved in Atlas DB! Job marked as Completed.', 'success');
+      renderProfile();
+      renderPerformance();
+      await renderJobs();
+    }
+
+    function starDisplay(rating) {
+      const full  = Math.floor(rating);
+      const empty = 5 - full;
+      return (
+        `<span class="star-row">` +
+        '<i class="fa-solid fa-star star-filled"></i>'.repeat(full) +
+        '<i class="fa-regular fa-star star-empty"></i>'.repeat(empty) +
+        `</span>`
+      );
+    }
+
+    function capitalize(str) {
+      return str ? str.charAt(0).toUpperCase() + str.slice(1) : '';
+    }
+
+    function showNotification(msg, type = 'success') {
+      const el = document.getElementById('page-notification');
+      el.className = `notification-strip ${type}`;
+      el.innerHTML = `<i class="fa-solid fa-${type === 'success' ? 'circle-check' : 'circle-exclamation'}"></i> ${msg}`;
+      el.style.display = 'flex';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      setTimeout(() => { el.style.display = 'none'; }, 5000);
+    }
+
+    function renderRecruitmentJourney() {
+      const el = document.getElementById('journey-pipeline');
+      if (!el) return;
+
+      const mobile    = currentUser.mobile;
+      const candList  = Array.isArray(db.candidates) ? db.candidates : Object.values(db.candidates);
+      const candidate = candList.find(c => c.mobile === mobile || (currentUser.email && c.email === currentUser.email));
+
+      if (!candidate) {
+        el.innerHTML = `<div style="font-size:0.75rem;color:#9ca3af;font-style:italic;">No application record found for this account.</div>`;
+        return;
+      }
+
+      const phases = [
+        { n:1, icon:'fa-file-signature',   label:'Application Submitted',          sub:'Your online application was received.' },
+        { n:2, icon:'fa-id-card-clip',     label:'HR Document Verification',       sub:'Qualifications & license reviewed by HR.' },
+        { n:3, icon:'fa-person-chalkboard',label:'Technical Interview & BG Check', sub:'Interview scored & background verified.' },
+        { n:4, icon:'fa-map-location',     label:'Taluka Allocation',              sub:'Allocated to your preferred taluka.' },
+        { n:5, icon:'fa-id-badge',         label:'Active Surveyor',                sub:`Employee ID: ${candidate.employeeId || 'Pending'}` },
+      ];
+
+      const map = {
+        'Submitted':                  { done:1, active:2, fail:false },
+        'Under Review':               { done:1, active:2, fail:false },
+        'Document Verification':      { done:2, active:3, fail:false },
+        'Interview Scheduled':        { done:3, active:4, fail:false },
+        'Interview Pending':          { done:2, active:3, fail:false },
+        'Selected':                   { done:4, active:5, fail:false },
+        'Waiting':                    { done:3, active:4, fail:false },
+        'Surveyor Account Activated': { done:5, active:-1, fail:false },
+        'Rejected':                   { done:0, active:-1, fail:true, failAt:1 },
+        'BG Failed':                  { done:2, active:-1, fail:true, failAt:3 },
+      };
+      const state = map[candidate.status] || { done:1, active:2, fail:false };
+
+      let html = '';
+      phases.forEach(p => {
+        let cls  = '';
+        let icon = `<i class="fa-solid ${p.icon}"></i>`;
+
+        if (state.fail && p.n === state.failAt) {
+          cls  = 'jp-fail';
+          icon = `<i class="fa-solid fa-xmark"></i>`;
+        } else if (p.n <= state.done) {
+          cls  = 'jp-done';
+          icon = `<i class="fa-solid fa-check"></i>`;
+        } else if (p.n === state.active) {
+          cls  = 'jp-now';
+        }
+
+        const subText = (p.n === state.active && !state.fail)
+          ? `<div class="jp-sub">⟳ In progress — awaiting admin action</div>`
+          : `<div class="jp-sub">${p.sub}</div>`;
+
+        html += `
+          <div class="jp-item ${cls}">
+            <div class="jp-dot">${icon}</div>
+            <div>
+              <div class="jp-label">Phase ${p.n}: ${p.label}</div>
+              ${subText}
+            </div>
+          </div>`;
+      });
+
+      const tips = {
+        'Submitted':                  `<div style="margin-top:0.6rem;font-size:0.7rem;color:#ca8a04;background:#fefce8;border-radius:7px;padding:5px 8px;border:1px solid #fde047;"><i class="fa-solid fa-clock"></i> Application submitted. HR will begin review shortly.</div>`,
+        'Under Review':               `<div style="margin-top:0.6rem;font-size:0.7rem;color:#ca8a04;background:#fefce8;border-radius:7px;padding:5px 8px;border:1px solid #fde047;"><i class="fa-solid fa-clock"></i> Under admin review. No action needed.</div>`,
+        'Document Verification':      `<div style="margin-top:0.6rem;font-size:0.7rem;color:#ca8a04;background:#fefce8;border-radius:7px;padding:5px 8px;border:1px solid #fde047;"><i class="fa-solid fa-clock"></i> HR is verifying your documents. Please wait.</div>`,
+        'Interview Scheduled':        `<div style="margin-top:0.6rem;font-size:0.7rem;color:#2563eb;background:#eff6ff;border-radius:7px;padding:5px 8px;border:1px solid #bfdbfe;"><i class="fa-solid fa-video"></i> Interview scheduled! Check the Applicant Portal for date, time & link.</div>`,
+        'Interview Pending':          `<div style="margin-top:0.6rem;font-size:0.7rem;color:#ca8a04;background:#fefce8;border-radius:7px;padding:5px 8px;border:1px solid #fde047;"><i class="fa-solid fa-clock"></i> Awaiting your technical interview. Check back here.</div>`,
+        'Selected':                   `<div style="margin-top:0.6rem;font-size:0.7rem;color:#15803d;background:#f0fdf4;border-radius:7px;padding:5px 8px;border:1px solid #bbf7d0;"><i class="fa-solid fa-circle-check"></i> Selected! Admin will activate your surveyor account.</div>`,
+        'Waiting':                    `<div style="margin-top:0.6rem;font-size:0.7rem;color:#2563eb;background:#eff6ff;border-radius:7px;padding:5px 8px;border:1px solid #bfdbfe;"><i class="fa-solid fa-list-ol"></i> On waitlist for <strong>${candidate.taluka}</strong>. You'll be notified when a slot opens.</div>`,
+        'Surveyor Account Activated': `<div style="margin-top:0.6rem;font-size:0.7rem;color:#15803d;background:#f0fdf4;border-radius:7px;padding:5px 8px;border:1px solid #bbf7d0;"><i class="fa-solid fa-circle-check"></i> All phases complete! You are a verified AgriConnect Surveyor.</div>`,
+        'Rejected':                   `<div style="margin-top:0.6rem;font-size:0.7rem;color:#dc2626;background:#fef2f2;border-radius:7px;padding:5px 8px;border:1px solid #fecaca;"><i class="fa-solid fa-ban"></i> Application was not approved. Contact admin for details.</div>`,
+        'BG Failed':                  `<div style="margin-top:0.6rem;font-size:0.7rem;color:#dc2626;background:#fef2f2;border-radius:7px;padding:5px 8px;border:1px solid #fecaca;"><i class="fa-solid fa-ban"></i> Background check not cleared. Contact admin for details.</div>`,
+      };
+
+      el.innerHTML = html + (tips[candidate.status] || '');
+    }
+  </script>
+</body>
+</html>

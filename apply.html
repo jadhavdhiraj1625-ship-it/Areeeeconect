@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AgriConnect – Surveyor Candidate Application</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="shared_styles.css">
+  <style>
+    .apply-page-bg {
+      min-height: 100vh;
+      background: radial-gradient(ellipse at top right, rgba(85,197,122,0.15) 0%, transparent 60%),
+                  radial-gradient(ellipse at bottom left, rgba(45,106,79,0.2) 0%, transparent 60%),
+                  #0a1410;
+      padding: 2.5rem 1rem 4rem;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+    }
+
+    .apply-shell {
+      width: 100%;
+      max-width: 650px;
+    }
+
+    .back-home {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: rgba(255,255,255,0.75);
+      font-size: 0.82rem;
+      font-weight: 600;
+      text-decoration: none;
+      margin-bottom: 1.2rem;
+      transition: color 0.2s;
+    }
+    .back-home:hover { color: #55c57a; }
+
+    .apply-stepper {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.8rem;
+      padding: 0;
+    }
+    .stepper-step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.35rem;
+      flex: 1;
+      position: relative;
+    }
+    .stepper-step:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      top: 16px;
+      left: calc(50% + 16px);
+      right: calc(-50% + 16px);
+      height: 2px;
+      background: rgba(255,255,255,0.15);
+    }
+    .stepper-step.active:not(:last-child)::after { background: rgba(85,197,122,0.4); }
+    .step-dot {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.1);
+      border: 2px solid rgba(255,255,255,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.78rem;
+      color: rgba(255,255,255,0.4);
+      z-index: 2;
+    }
+    .stepper-step.active .step-dot {
+      background: linear-gradient(135deg,#43936c,#2d6a4f);
+      border-color: #55c57a;
+      color: white;
+      box-shadow: 0 0 10px rgba(85,197,122,0.3);
+    }
+    .step-lbl {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: rgba(255,255,255,0.4);
+    }
+    .stepper-step.active .step-lbl { color: #55c57a; }
+
+    .apply-card {
+      background: rgba(8, 18, 12, 0.9);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 18px;
+      padding: 2.8rem 2.6rem;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+      color: white;
+    }
+
+    .apply-card-title {
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: white;
+      letter-spacing: -0.5px;
+      margin: 0 0 0.3rem;
+    }
+    .apply-card-sub {
+      font-size: 0.84rem;
+      color: rgba(255,255,255,0.55);
+      margin-bottom: 2rem;
+      line-height: 1.5;
+    }
+
+    .form-section-label {
+      font-size: 0.88rem;
+      font-weight: 800;
+      color: #55c57a;
+      border-bottom: 1.5px solid rgba(85,197,122,0.2);
+      padding-bottom: 0.35rem;
+      margin: 1.8rem 0 1.1rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .form-section-label:first-of-type { margin-top: 0; }
+
+    .af-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.2rem;
+      margin-bottom: 1rem;
+    }
+    @media (max-width: 550px) {
+      .af-row { grid-template-columns: 1fr; gap: 1rem; }
+    }
+
+    .af-group {
+      display: flex;
+      flex-direction: column;
+    }
+    .af-group.full-width { grid-column: 1 / -1; }
+
+    .af-group label {
+      display: block;
+      font-size: 0.76rem;
+      font-weight: 700;
+      color: rgba(255,255,255,0.65);
+      margin-bottom: 0.38rem;
+    }
+    .af-input {
+      width: 100%;
+      padding: 0.72rem 0.95rem;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 9px;
+      color: white;
+      font-size: 0.9rem;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.2s, background 0.2s;
+      box-sizing: border-box;
+    }
+    .af-input option { background: #1a2f23; color: white; }
+    .af-input::placeholder { color: rgba(255,255,255,0.28); }
+    .af-input:focus {
+      border-color: #55c57a;
+      background: rgba(255,255,255,0.11);
+    }
+    .af-input.error { border-color: #ff8fa3; }
+
+    .file-input-wrapper {
+      position: relative;
+      width: 100%;
+    }
+    .file-input-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.72rem 0.95rem;
+      background: rgba(255,255,255,0.06);
+      border: 1px dashed rgba(255,255,255,0.25);
+      border-radius: 9px;
+      color: rgba(255,255,255,0.55);
+      font-size: 0.84rem;
+      cursor: pointer;
+      box-sizing: border-box;
+      transition: all 0.22s;
+    }
+    .file-input-btn:hover {
+      border-color: #55c57a;
+      background: rgba(85,197,122,0.08);
+      color: white;
+    }
+    .file-input-btn.uploaded {
+      border-style: solid;
+      border-color: #55c57a;
+      background: rgba(85,197,122,0.12);
+      color: #55c57a;
+    }
+
+    .af-err {
+      font-size: 0.7rem;
+      color: #ff8fa3;
+      margin-top: 0.25rem;
+      display: none;
+    }
+
+    .btn-apply-submit {
+      width: 100%;
+      padding: 0.9rem;
+      background: linear-gradient(135deg,#43936c,#2d6a4f);
+      border: none;
+      border-radius: 10px;
+      color: white;
+      font-size: 0.95rem;
+      font-weight: 800;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.25s;
+      margin-top: 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+    }
+    .btn-apply-submit:hover {
+      background: linear-gradient(135deg,#4da878,#357656);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(67,147,108,0.45);
+    }
+    .btn-apply-submit:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+    .apply-success {
+      text-align: center;
+      padding: 2.2rem 1rem;
+      display: none;
+    }
+    .apply-success .success-icon {
+      width: 72px;
+      height: 72px;
+      background: rgba(85,197,122,0.15);
+      border: 2px solid #55c57a;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.2rem;
+      color: #55c57a;
+      margin: 0 auto 1.4rem;
+    }
+    .apply-success h3 {
+      font-size: 1.5rem;
+      font-weight: 800;
+      margin-bottom: 0.5rem;
+    }
+    .apply-success p {
+      font-size: 0.88rem;
+      color: rgba(255,255,255,0.7);
+      margin-bottom: 1.8rem;
+      line-height: 1.5;
+    }
+    .btn-back-login {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.8rem;
+      background: linear-gradient(135deg,#43936c,#2d6a4f);
+      border-radius: 9px;
+      color: white;
+      font-weight: 700;
+      font-size: 0.9rem;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+    .btn-back-login:hover { transform: translateY(-2px); color: white; }
+
+    .apply-note {
+      margin-top: 1.5rem;
+      padding: 1rem;
+      background: rgba(255,255,255,0.04);
+      border-radius: 10px;
+      font-size: 0.76rem;
+      color: rgba(255,255,255,0.45);
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+<div class="apply-page-bg">
+  <div class="apply-shell">
+
+    <a href="index.html" class="back-home">
+      <i class="fa-solid fa-chevron-left"></i> Back to AgriConnect
+    </a>
+
+    <div class="apply-stepper">
+      <div class="stepper-step active">
+        <div class="step-dot"><i class="fa-solid fa-file-signature"></i></div>
+        <div class="step-lbl">Apply</div>
+      </div>
+      <div class="stepper-step">
+        <div class="step-dot">2</div>
+        <div class="step-lbl">HR Review</div>
+      </div>
+      <div class="stepper-step">
+        <div class="step-dot">3</div>
+        <div class="step-lbl">Interview</div>
+      </div>
+      <div class="stepper-step">
+        <div class="step-dot">4</div>
+        <div class="step-lbl">Allocation</div>
+      </div>
+      <div class="stepper-step">
+        <div class="step-dot">5</div>
+        <div class="step-lbl">Activated</div>
+      </div>
+    </div>
+
+    <div class="apply-card">
+
+      <!-- Form Section -->
+      <div id="apply-form-section">
+        <h1 class="apply-card-title">Surveyor Candidate Registration</h1>
+        <p class="apply-card-sub">
+          Fill in the application details to begin the surveyor onboarding process. After submitting, log in to track your application status.
+        </p>
+
+        <form id="apply-form" onsubmit="handleApply(event)" novalidate>
+
+          <!-- Personal Details -->
+          <div class="form-section-label">Personal & Contact Info</div>
+          <div class="af-row">
+            <div class="af-group">
+              <label for="c-name">Full Name *</label>
+              <input type="text" id="c-name" class="af-input" placeholder="e.g. Dhiraj Patil" required>
+              <div class="af-err" id="err-name">Please enter your full name.</div>
+            </div>
+            <div class="af-group">
+              <label for="c-email">Email Address * <small style="color:rgba(255,255,255,0.35)">(used to log in)</small></label>
+              <input type="email" id="c-email" class="af-input" placeholder="dhiraj@gmail.com" required>
+              <div class="af-err" id="err-email">Enter a valid email address.</div>
+            </div>
+          </div>
+
+          <div class="af-row">
+            <div class="af-group">
+              <label for="c-mobile">Mobile Number *</label>
+              <input type="tel" id="c-mobile" class="af-input" placeholder="10-digit mobile" maxlength="10" required>
+              <div class="af-err" id="err-mobile">Enter a valid 10-digit number.</div>
+            </div>
+            <div class="af-group">
+              <label for="c-password">Create Account Password *</label>
+              <input type="password" id="c-password" class="af-input" placeholder="Min 6 characters" required>
+              <div class="af-err" id="err-password">Please enter a password (min 6 chars).</div>
+            </div>
+          </div>
+
+          <!-- Address details -->
+          <div class="af-row">
+            <div class="af-group full-width">
+              <label for="c-address">Address *</label>
+              <input type="text" id="c-address" class="af-input" placeholder="Flat / House details, Village, Street Name" required>
+              <div class="af-err" id="err-address">Please enter your address.</div>
+            </div>
+          </div>
+
+          <div class="af-row">
+            <div class="af-group">
+              <label for="c-district">District *</label>
+              <input type="text" id="c-district" class="af-input" placeholder="e.g. Jalgaon" required>
+              <div class="af-err" id="err-district">Please enter your district.</div>
+            </div>
+            <div class="af-group">
+              <label for="c-taluka">Preferred Taluka *</label>
+              <select id="c-taluka" class="af-input" required>
+                <option value="">Select taluka</option>
+                <option value="chopda">Chopda</option>
+                <option value="thalner">Thalner</option>
+                <option value="shirpur">Shirpur</option>
+                <option value="jalgaon">Jalgaon</option>
+                <option value="jamner">Jamner</option>
+                <option value="pachora">Pachora</option>
+              </select>
+              <div class="af-err" id="err-taluka">Please select a preferred taluka.</div>
+            </div>
+          </div>
+
+          <!-- Professional Details -->
+          <div class="form-section-label">Professional Info & Documents</div>
+          <div class="af-row">
+            <div class="af-group">
+              <label for="c-qualification">Qualification *</label>
+              <select id="c-qualification" class="af-input" required>
+                <option value="">Select qualification</option>
+                <option value="B.Tech Civil Engineering">B.Tech Civil Engineering</option>
+                <option value="Diploma Civil Engineering">Diploma Civil & Surveying</option>
+                <option value="ITI Surveyor Certification">ITI Surveyor Certification</option>
+              </select>
+              <div class="af-err" id="err-qual">Please select your qualification.</div>
+            </div>
+            <div class="af-group">
+              <label for="c-experience">Years of Experience *</label>
+              <input type="number" id="c-experience" class="af-input" placeholder="e.g. 3" min="0" max="40" required>
+              <div class="af-err" id="err-exp">Enter valid years of experience.</div>
+            </div>
+          </div>
+
+          <div class="af-row">
+            <div class="af-group full-width">
+              <label for="c-license">Survey License / Certificate Code *</label>
+              <input type="text" id="c-license" class="af-input" placeholder="e.g. LIC-556677" required>
+              <div class="af-err" id="err-license">Enter your surveyor license code.</div>
+            </div>
+          </div>
+
+          <!-- Documents upload files -->
+          <div class="af-row">
+            <div class="af-group">
+              <label>Aadhaar Card Upload (PDF/JPG) *</label>
+              <div class="file-input-wrapper">
+                <input type="file" id="file-aadhaar" style="display:none;" onchange="updateFileLabel('file-aadhaar', 'lbl-aadhaar')">
+                <div class="file-input-btn" id="lbl-aadhaar" onclick="document.getElementById('file-aadhaar').click()">
+                  <i class="fa-solid fa-cloud-arrow-up"></i> Choose Aadhaar file
+                </div>
+              </div>
+              <div class="af-err" id="err-file-aadhaar">Please upload your Aadhaar document.</div>
+            </div>
+            <div class="af-group">
+              <label>Survey License Upload (PDF/JPG) *</label>
+              <div class="file-input-wrapper">
+                <input type="file" id="file-license" style="display:none;" onchange="updateFileLabel('file-license', 'lbl-license')">
+                <div class="file-input-btn" id="lbl-license" onclick="document.getElementById('file-license').click()">
+                  <i class="fa-solid fa-cloud-arrow-up"></i> Choose License file
+                </div>
+              </div>
+              <div class="af-err" id="err-file-license">Please upload your License document.</div>
+            </div>
+          </div>
+
+          <div class="af-row">
+            <div class="af-group">
+              <label>Resume / CV Upload (PDF) *</label>
+              <div class="file-input-wrapper">
+                <input type="file" id="file-resume" style="display:none;" onchange="updateFileLabel('file-resume', 'lbl-resume')">
+                <div class="file-input-btn" id="lbl-resume" onclick="document.getElementById('file-resume').click()">
+                  <i class="fa-solid fa-cloud-arrow-up"></i> Choose Resume file
+                </div>
+              </div>
+              <div class="af-err" id="err-file-resume">Please upload your resume.</div>
+            </div>
+            <div class="af-group">
+              <label>Passport Size Photo *</label>
+              <div class="file-input-wrapper">
+                <input type="file" id="file-photo" style="display:none;" onchange="updateFileLabel('file-photo', 'lbl-photo')">
+                <div class="file-input-btn" id="lbl-photo" onclick="document.getElementById('file-photo').click()">
+                  <i class="fa-solid fa-cloud-arrow-up"></i> Choose Photo file
+                </div>
+              </div>
+              <div class="af-err" id="err-file-photo">Please upload your passport photo.</div>
+            </div>
+          </div>
+
+          <button type="submit" class="btn-apply-submit" id="apply-btn">
+            <i class="fa-solid fa-paper-plane"></i>
+            <span id="apply-btn-txt">Submit Application</span>
+          </button>
+        </form>
+
+        <div class="apply-note">
+          <strong><i class="fa-solid fa-circle-info"></i> Account Setup:</strong><br>
+          You are setting up an email and password to log in directly to your **Surveyor Applicant Dashboard** immediately after submission to track document verification status and interview schedules.
+        </div>
+      </div>
+
+      <!-- Success Section -->
+      <div class="apply-success" id="apply-success-section">
+        <div class="success-icon"><i class="fa-solid fa-circle-check"></i></div>
+        <h3>Application Submitted!</h3>
+        <p>Your application is now under review in <strong>Phase 2 – HR Verification</strong>. Our admin team will inspect your uploaded credentials.</p>
+
+        <div style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); border-radius:10px; padding:0.95rem 1.25rem; font-size:0.78rem; color:rgba(255,255,255,0.65); line-height:1.6; margin-bottom:1.5rem; text-align:left;">
+          <strong style="color:rgba(255,255,255,0.88);">📍 Check your status:</strong><br>
+          Use your registered **Email** and **Password** in the **Applicant Login** screen to access your recruitment profile, track status timeline, view scheduled interview date/time, and download your offer letter once approved!
+        </div>
+
+        <a href="applicant.html" class="btn-back-login">
+          <i class="fa-solid fa-right-to-bracket"></i> Go to Applicant Login
+        </a>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="config.js?v=2.2"></script>
+<script src="api.js?v=2.2"></script>
+<script src="shared.js?v=2.2"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', async () => {
+    await loadDynamicTalukas();
+  });
+
+  async function loadDynamicTalukas() {
+    const sel = document.getElementById('c-taluka');
+    if (!sel) return;
+    try {
+      const res = await AgriConnectAPI.apiGet('/talukas');
+      if (res && res.success && Array.isArray(res.talukas) && res.talukas.length > 0) {
+        sel.innerHTML = '<option value="">Select taluka</option>' +
+          res.talukas.map(t => `<option value="${t.name}">${t.displayName || (t.name.charAt(0).toUpperCase() + t.name.slice(1))}</option>`).join('');
+      }
+    } catch (err) {
+      console.warn('Fallback to static talukas in apply.html:', err);
+    }
+  }
+
+  function showErr(id, show) {
+    const el = document.getElementById(id);
+    if (el) el.style.display = show ? 'block' : 'none';
+  }
+
+  function setFieldError(inputId, errId, isError) {
+    const field = document.getElementById(inputId);
+    if (field) field.classList.toggle('error', isError);
+    showErr(errId, isError);
+  }
+
+  function updateFileLabel(inputId, labelId) {
+    const input = document.getElementById(inputId);
+    const label = document.getElementById(labelId);
+    if (input.files && input.files[0]) {
+      label.className = "file-input-btn uploaded";
+      label.innerHTML = `<i class="fa-solid fa-check"></i> ${input.files[0].name.substring(0, 20)}`;
+    }
+  }
+
+  async function handleApply(e) {
+    e.preventDefault();
+
+    const name          = document.getElementById('c-name').value.trim();
+    const email         = document.getElementById('c-email').value.trim();
+    const mobile        = document.getElementById('c-mobile').value.trim();
+    const password      = document.getElementById('c-password').value;
+    const address       = document.getElementById('c-address').value.trim();
+    const district      = document.getElementById('c-district').value.trim();
+    const taluka        = document.getElementById('c-taluka').value;
+    const qualification = document.getElementById('c-qualification').value;
+    const experience    = document.getElementById('c-experience').value;
+    const license       = document.getElementById('c-license').value.trim();
+
+    const fAadhaar      = document.getElementById('file-aadhaar').files[0];
+    const fLicense      = document.getElementById('file-license').files[0];
+    const fResume       = document.getElementById('file-resume').files[0];
+    const fPhoto        = document.getElementById('file-photo').files[0];
+
+    let valid = true;
+
+    if (!name)                                { setFieldError('c-name','err-name',true); valid=false; } else setFieldError('c-name','err-name',false);
+    if (!email || !email.includes('@'))       { setFieldError('c-email','err-email',true); valid=false; } else setFieldError('c-email','err-email',false);
+    if (!/^[0-9]{10}$/.test(mobile))          { setFieldError('c-mobile','err-mobile',true); valid=false; } else setFieldError('c-mobile','err-mobile',false);
+    if (!password || password.length < 6)     { setFieldError('c-password','err-password',true); valid=false; } else setFieldError('c-password','err-password',false);
+    if (!address)                             { setFieldError('c-address','err-address',true); valid=false; } else setFieldError('c-address','err-address',false);
+    if (!district)                            { setFieldError('c-district','err-district',true); valid=false; } else setFieldError('c-district','err-district',false);
+    if (!taluka)                              { setFieldError('c-taluka','err-taluka',true); valid=false; } else setFieldError('c-taluka','err-taluka',false);
+    if (!qualification)                       { setFieldError('c-qualification','err-qual',true); valid=false; } else setFieldError('c-qualification','err-qual',false);
+    if (!experience || parseInt(experience)<0){ setFieldError('c-experience','err-exp',true); valid=false; } else setFieldError('c-experience','err-exp',false);
+    if (!license)                             { setFieldError('c-license','err-license',true); valid=false; } else setFieldError('c-license','err-license',false);
+
+    const aadhaarName = fAadhaar ? fAadhaar.name : "Aadhaar_Document_Default.pdf";
+    const licenseName = fLicense ? fLicense.name : "Surveyor_License_Default.pdf";
+    const resumeName  = fResume  ? fResume.name  : "Professional_Resume_Default.pdf";
+    const photoName   = fPhoto   ? fPhoto.name   : "Passport_Photo_Default.jpg";
+
+    if (!valid) return;
+
+    const btn = document.getElementById('apply-btn');
+    const txt = document.getElementById('apply-btn-txt');
+    btn.disabled = true;
+    txt.textContent = 'Submitting…';
+
+    const candId = `cand-${Date.now()}`;
+    const newCand = {
+      id: candId,
+      name,
+      fullName: name,
+      email,
+      mobile,
+      password,
+      address,
+      district,
+      taluka,
+      preferredTaluka: taluka,
+      qualification,
+      experience: Number(experience),
+      experienceYears: Number(experience),
+      license,
+      licenseId: license,
+      status: 'Applied',
+      applicationStatus: 'applied',
+      interviewScore: null,
+      employeeId: null,
+      aadhaarFile: aadhaarName,
+      licenseFile: licenseName,
+      resumeFile: resumeName,
+      photoFile: photoName,
+      appliedAt: new Date().toISOString()
+    };
+
+    try {
+      const regRes = await AgriConnectAPI.apiPost('/auth/register', {
+        name,
+        email,
+        mobile,
+        password,
+        taluka,
+        role: 'candidate'
+      });
+
+      if (regRes && regRes.token) {
+        AgriConnectAPI.setToken(regRes.token);
+      }
+
+      const candRes = await AgriConnectAPI.apiPost('/candidates', {
+        fullName: name,
+        email,
+        mobile,
+        address,
+        district,
+        preferredTaluka: taluka,
+        qualification,
+        experienceYears: Number(experience),
+        licenseId: license
+      });
+
+      if (candRes && candRes.candidate) {
+        newCand.id = candRes.candidate._id;
+      }
+    } catch (err) {
+      console.warn("API candidate registration fallback:", err);
+    }
+
+    const db = new AgriConnectDB();
+    if (Array.isArray(db.candidates)) {
+      db.candidates.push(newCand);
+    } else {
+      db.candidates[newCand.id] = newCand;
+    }
+    db.saveState();
+
+    document.getElementById("apply-form-section").style.display = "none";
+    document.getElementById("apply-success-section").style.display = "block";
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+</script>
+</body>
+</html>
