@@ -12,7 +12,7 @@
 
 (function() {
   // Set your default Render backend URL here
-  const DEFAULT_RENDER_URL = 'https://agriconnect-backend.onrender.com/api';
+  const DEFAULT_RENDER_URL = 'https://a-b-1-snoy.onrender.com/api';
 
   function determineBaseUrl() {
     // 1. Runtime override via localStorage (useful for instant testing without redeployment)

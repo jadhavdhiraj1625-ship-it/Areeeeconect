@@ -1,5 +1,5 @@
 
-// api.js – Reusable Client-Side REST API Helper with Hybrid Fallback
+// api.js – Reusable Client-Side REST API Helper for AgriConnect
 class AgriConnectAPI {
   static _memoryToken = null;
   static _memoryUser = null;
@@ -9,6 +9,7 @@ class AgriConnectAPI {
     try {
       if (typeof localStorage !== 'undefined') {
         const custom = localStorage.getItem('AGRICONNECT_API_URL');
+
         if (custom && custom.trim()) {
           return custom.trim().replace(/\/+$/, '');
         }
@@ -32,12 +33,18 @@ class AgriConnectAPI {
       return window.AgriConnectConfig.API_BASE_URL.replace(/\/+$/, '');
     }
 
-    if (typeof window !== 'undefined' && window.API_BASE_URL) {
+    if (
+      typeof window !== 'undefined' &&
+      window.API_BASE_URL
+    ) {
       return window.API_BASE_URL.replace(/\/+$/, '');
     }
 
     // 3. Environment detection
-    if (typeof window !== 'undefined' && window.location) {
+    if (
+      typeof window !== 'undefined' &&
+      window.location
+    ) {
       const hostname = window.location.hostname;
 
       const isLocal =
@@ -45,22 +52,26 @@ class AgriConnectAPI {
         hostname === '127.0.0.1' ||
         hostname === '';
 
+      // Local development
       if (isLocal) {
         if (
-          window.location.port === '10000' ||
-          window.location.port === 10000
+          window.location.port === '5000' ||
+          window.location.port === 5000
         ) {
-          return `${window.location.protocol}//${hostname || 'localhost'}:10000/api`;
+          return `${window.location.protocol}//${
+            hostname || 'localhost'
+          }:5000/api`;
         }
 
-        return 'http://localhost:10000/api';
+        return 'http://localhost:5000/api';
       }
 
-      // Production backend - Render
+      // Production backend on Render
       return 'https://a-b-1-snoy.onrender.com/api';
     }
 
-    return 'http://localhost:10000/api';
+    // Final fallback
+    return 'https://a-b-1-snoy.onrender.com/api';
   }
 
   static getToken() {
@@ -80,322 +91,347 @@ class AgriConnectAPI {
       }
     } catch (e) {}
 
-    return AgriConnectAPI._memoryToken || null;
+    return this._memoryToken;
   }
 
   static setToken(token) {
-    AgriConnectAPI._memoryToken = token;
-
-    try {
-      if (typeof localStorage !== 'undefined' && token) {
-        localStorage.setItem('agriconnect_token', token);
-      }
-
-      if (typeof sessionStorage !== 'undefined' && token) {
-        sessionStorage.setItem('agriconnect_token', token);
-      }
-    } catch (e) {
-      console.warn('Storage persistence warning:', e.message);
-    }
-  }
-
-  static removeToken() {
-    AgriConnectAPI._memoryToken = null;
-    AgriConnectAPI._memoryUser = null;
+    this._memoryToken = token;
 
     try {
       if (typeof localStorage !== 'undefined') {
-        localStorage.removeItem('agriconnect_token');
-        localStorage.removeItem('currentUser');
+        if (token) {
+          localStorage.setItem(
+            'agriconnect_token',
+            token
+          );
+        } else {
+          localStorage.removeItem(
+            'agriconnect_token'
+          );
+        }
       }
 
       if (typeof sessionStorage !== 'undefined') {
-        sessionStorage.removeItem('agriconnect_token');
-        sessionStorage.removeItem('currentUser');
-        sessionStorage.removeItem('agriconnect_user');
+        if (token) {
+          sessionStorage.setItem(
+            'agriconnect_token',
+            token
+          );
+        } else {
+          sessionStorage.removeItem(
+            'agriconnect_token'
+          );
+        }
       }
     } catch (e) {}
+  }
+
+  static removeToken() {
+    this.setToken(null);
+  }
+
+  static clearToken() {
+    this.setToken(null);
   }
 
   static getCurrentUser() {
     try {
       if (typeof sessionStorage !== 'undefined') {
-        const raw =
-          sessionStorage.getItem('currentUser') ||
-          sessionStorage.getItem('agriconnect_user');
+        const u1 =
+          sessionStorage.getItem(
+            'agriconnect_user'
+          ) ||
+          sessionStorage.getItem(
+            'currentUser'
+          );
 
-        if (raw) {
-          return JSON.parse(raw);
+        if (u1) {
+          return JSON.parse(u1);
         }
       }
 
       if (typeof localStorage !== 'undefined') {
-        const raw = localStorage.getItem('currentUser');
+        const u2 =
+          localStorage.getItem(
+            'agriconnect_user'
+          ) ||
+          localStorage.getItem(
+            'currentUser'
+          );
 
-        if (raw) {
-          return JSON.parse(raw);
+        if (u2) {
+          return JSON.parse(u2);
         }
       }
     } catch (e) {}
 
-    return AgriConnectAPI._memoryUser || null;
+    return this._memoryUser;
   }
 
   static setCurrentUser(user) {
-    AgriConnectAPI._memoryUser = user;
+    this._memoryUser = user;
 
     try {
-      if (user) {
-        const str = JSON.stringify(user);
+      const str = JSON.stringify(user);
 
-        if (typeof sessionStorage !== 'undefined') {
-          sessionStorage.setItem('currentUser', str);
-          sessionStorage.setItem('agriconnect_user', str);
-        }
+      if (typeof sessionStorage !== 'undefined') {
+        sessionStorage.setItem(
+          'agriconnect_user',
+          str
+        );
 
-        if (typeof localStorage !== 'undefined') {
-          localStorage.setItem('currentUser', str);
-        }
+        sessionStorage.setItem(
+          'currentUser',
+          str
+        );
+      }
+
+      if (typeof localStorage !== 'undefined') {
+        localStorage.setItem(
+          'agriconnect_user',
+          str
+        );
+
+        localStorage.setItem(
+          'currentUser',
+          str
+        );
       }
     } catch (e) {}
   }
 
-  static async request(endpoint, options = {}) {
+  static clearUser() {
+    this._memoryUser = null;
+
+    try {
+      if (typeof sessionStorage !== 'undefined') {
+        sessionStorage.removeItem(
+          'agriconnect_user'
+        );
+
+        sessionStorage.removeItem(
+          'currentUser'
+        );
+      }
+
+      if (typeof localStorage !== 'undefined') {
+        localStorage.removeItem(
+          'agriconnect_user'
+        );
+
+        localStorage.removeItem(
+          'currentUser'
+        );
+      }
+    } catch (e) {}
+  }
+
+  static logout() {
+    this.clearToken();
+    this.clearUser();
+
+    if (
+      typeof window !== 'undefined' &&
+      window.location
+    ) {
+      window.location.href = 'login.html';
+    }
+  }
+
+  static async request(
+    endpoint,
+    options = {}
+  ) {
     const baseUrl = this.getBaseUrl();
 
-    const url = `${baseUrl}${
-      endpoint.startsWith('/') ? endpoint : '/' + endpoint
-    }`;
+    const cleanEndpoint =
+      endpoint.startsWith('/')
+        ? endpoint
+        : `/${endpoint}`;
 
-    const token = this.getToken();
+    const url =
+      `${baseUrl}${cleanEndpoint}`;
 
     const headers = {
       'Content-Type': 'application/json',
       ...(options.headers || {})
     };
 
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
+    const token = this.getToken();
+
+    if (
+      token &&
+      !headers['Authorization']
+    ) {
+      headers['Authorization'] =
+        `Bearer ${token}`;
     }
 
     const config = {
-      ...options,
-      headers
+      method: options.method || 'GET',
+      headers,
+      ...options
     };
 
-    if (config.body && typeof config.body === 'object') {
-      config.body = JSON.stringify(config.body);
+    if (
+      options.body &&
+      typeof options.body === 'object' &&
+      !(options.body instanceof FormData)
+    ) {
+      config.body =
+        JSON.stringify(options.body);
     }
 
     try {
+      const response =
+        await fetch(url, config);
+
+      const contentType =
+        response.headers.get(
+          'content-type'
+        );
+
+      let data;
+
       if (
-        typeof window !== 'undefined' &&
-        window.AgriConnectConfig &&
-        window.AgriConnectConfig.IS_DEV
+        contentType &&
+        contentType.includes(
+          'application/json'
+        )
       ) {
-        console.log(
-          `[API] ${config.method || 'GET'} ${endpoint}`
-        );
+        data = await response.json();
+      } else {
+        const text =
+          await response.text();
+
+        try {
+          data = JSON.parse(text);
+        } catch {
+          data = {
+            message: text
+          };
+        }
       }
 
-      // 15-second timeout controller for cloud Atlas queries
-      const controller =
-        typeof AbortController !== 'undefined'
-          ? new AbortController()
-          : null;
-
-      let timeoutId = null;
-
-      if (controller) {
-        timeoutId = setTimeout(() => controller.abort(), 15000);
-        config.signal = controller.signal;
-      }
-
-      const res = await fetch(url, config);
-
-      if (timeoutId) {
-        clearTimeout(timeoutId);
-      }
-
-      let data = {};
-
-      try {
-        data = await res.json();
-      } catch (e) {
-        data = {
-          success: res.ok,
-          statusText: res.statusText
-        };
-      }
-
-      if (res.status === 401) {
-        console.warn(
-          `[API] 401 Unauthorized on ${endpoint}`
-        );
-
+      if (!response.ok) {
         return {
           success: false,
-          status: 401,
-          isAuthError: true,
+          status: response.status,
           message:
-            data.message ||
-            'Session expired. Please log in again.'
-        };
-      }
-
-      if (res.status === 403) {
-        console.warn(
-          `[API] 403 Forbidden on ${endpoint}`
-        );
-
-        return {
-          success: false,
-          status: 403,
-          isForbidden: true,
-          message:
-            data.message ||
-            'Access forbidden: Insufficient permissions.'
-        };
-      }
-
-      if (res.status === 400) {
-        return {
-          success: false,
-          status: 400,
-          isValidationError: true,
-          message:
-            data.message || 'Validation error'
-        };
-      }
-
-      if (res.status === 404) {
-        return {
-          success: false,
-          status: 404,
-          isNotFound: true,
-          message:
-            data.message || 'Resource not found'
-        };
-      }
-
-      if (res.status === 409) {
-        return {
-          success: false,
-          status: 409,
-          isConflictError: true,
-          message:
-            data.message ||
-            'Account with this email or mobile already exists.'
-        };
-      }
-
-      if (!res.ok) {
-        return {
-          success: false,
-          status: res.status,
-          isServerError: true,
-          message:
-            data.message ||
-            `Server error (${res.status})`
+            data && data.message
+              ? data.message
+              : `HTTP ${response.status}: ${response.statusText}`,
+          ...data
         };
       }
 
       return {
         success: true,
-        status: res.status,
+        status: response.status,
         ...data
       };
-    } catch (networkError) {
+    } catch (err) {
       console.warn(
-        `[API] Network unavailable on ${endpoint} (${networkError.message})`
+        `[AgriConnect API Error] ${
+          options.method || 'GET'
+        } ${url}:`,
+        err.message
       );
 
       return {
         success: false,
-        isNetworkError: true,
+        status: 0,
+        networkError: true,
         message:
-          `Backend server unreachable: ${networkError.message}. ` +
-          `Make sure the Node server is running.`,
-        error: networkError.message
+          `Connection to backend server failed (${err.message}). ` +
+          `Ensure the backend is reachable at ${baseUrl}.`
       };
     }
   }
 
-  static apiGet(endpoint) {
-    return this.request(endpoint, {
-      method: 'GET'
-    });
+  static async apiGet(
+    endpoint,
+    options = {}
+  ) {
+    return this.request(
+      endpoint,
+      {
+        ...options,
+        method: 'GET'
+      }
+    );
   }
 
-  static apiPost(endpoint, data) {
-    return this.request(endpoint, {
-      method: 'POST',
-      body: data
-    });
+  static async apiPost(
+    endpoint,
+    body = {},
+    options = {}
+  ) {
+    return this.request(
+      endpoint,
+      {
+        ...options,
+        method: 'POST',
+        body
+      }
+    );
   }
 
-  static apiPut(endpoint, data) {
-    return this.request(endpoint, {
-      method: 'PUT',
-      body: data
-    });
+  static async apiPut(
+    endpoint,
+    body = {},
+    options = {}
+  ) {
+    return this.request(
+      endpoint,
+      {
+        ...options,
+        method: 'PUT',
+        body
+      }
+    );
   }
 
-  static apiDelete(endpoint) {
-    return this.request(endpoint, {
-      method: 'DELETE'
-    });
+  static async apiDelete(
+    endpoint,
+    options = {}
+  ) {
+    return this.request(
+      endpoint,
+      {
+        ...options,
+        method: 'DELETE'
+      }
+    );
+  }
+
+  static async apiPatch(
+    endpoint,
+    body = {},
+    options = {}
+  ) {
+    return this.request(
+      endpoint,
+      {
+        ...options,
+        method: 'PATCH',
+        body
+      }
+    );
   }
 }
 
-// Global functional shortcuts
-const apiGet = (url) =>
-  AgriConnectAPI.apiGet(url);
-
-const apiPost = (url, data) =>
-  AgriConnectAPI.apiPost(url, data);
-
-const apiPut = (url, data) =>
-  AgriConnectAPI.apiPut(url, data);
-
-const apiDelete = (url) =>
-  AgriConnectAPI.apiDelete(url);
-
-const getToken = () =>
-  AgriConnectAPI.getToken();
-
-const setToken = (t) =>
-  AgriConnectAPI.setToken(t);
-
-const removeToken = () =>
-  AgriConnectAPI.removeToken();
-
-const getCurrentUser = () =>
-  AgriConnectAPI.getCurrentUser();
-
+// Global API object
 if (typeof window !== 'undefined') {
-  window.AgriConnectAPI = AgriConnectAPI;
-  window.apiGet = apiGet;
-  window.apiPost = apiPost;
-  window.apiPut = apiPut;
-  window.apiDelete = apiDelete;
-  window.getToken = getToken;
-  window.setToken = setToken;
-  window.removeToken = removeToken;
-  window.getCurrentUser = getCurrentUser;
+  window.AgriConnectAPI =
+    AgriConnectAPI;
 }
 
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports = {
-    AgriConnectAPI,
-    apiGet,
-    apiPost,
-    apiPut,
-    apiDelete,
-    getToken,
-    setToken,
-    removeToken,
-    getCurrentUser
-  };
+// Node.js / CommonJS support
+if (
+  typeof module !== 'undefined' &&
+  module.exports
+) {
+  module.exports =
+    AgriConnectAPI;
 }
-
