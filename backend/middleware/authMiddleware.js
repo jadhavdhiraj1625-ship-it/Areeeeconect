@@ -19,7 +19,8 @@ const protect = async (req, res, next) => {
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const secret = process.env.JWT_SECRET || 'agriconnect_secure_jwt_secret_key_2026_fallback';
+    const decoded = jwt.verify(token, secret);
 
     let user = null;
     try {

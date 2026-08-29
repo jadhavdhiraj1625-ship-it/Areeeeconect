@@ -506,15 +506,13 @@ if (typeof window !== 'undefined') {
   if (!window.AgriDB) window.AgriDB = new AgriConnectDB();
   window.AgriConnectDB = AgriConnectDB;
   window.AgriConnectAuth = AgriConnectAuth;
-  window.AgriConnectAPI = AgriConnectAPI;
-  window.apiGet = apiGet;
-  window.apiPost = apiPost;
-  window.apiPut = apiPut;
-  window.apiDelete = apiDelete;
-  window.getToken = getToken;
-  window.setToken = setToken;
-  window.removeToken = removeToken;
-  window.getCurrentUser = getCurrentUser;
+  if (typeof AgriConnectAPI !== 'undefined') {
+    window.AgriConnectAPI = AgriConnectAPI;
+    window.getToken = AgriConnectAPI.getToken.bind(AgriConnectAPI);
+    window.setToken = AgriConnectAPI.setToken.bind(AgriConnectAPI);
+    window.removeToken = AgriConnectAPI.removeToken.bind(AgriConnectAPI);
+    window.getCurrentUser = AgriConnectAPI.getCurrentUser.bind(AgriConnectAPI);
+  }
   window.graph = graph;
   window.nodeCoordinates = nodeCoordinates;
   window.talukas = talukas;
@@ -530,33 +528,18 @@ if (typeof document !== 'undefined' && document.addEventListener) {
 
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = {
-    AgriConnectConfig,
-    API_BASE_URL,
-    AgriConnectAPI,
     AgriConnectDB,
     AgriConnectAuth,
     graph,
     nodeCoordinates,
-    talukas,
-    apiGet,
-    apiPost,
-    apiPut,
-    apiDelete,
-    getToken,
-    setToken,
-    removeToken,
-    getCurrentUser
+    talukas
   };
 }
 
-
-if (typeof window !== 'undefined') {
-  window.AgriConnectAuth = AgriConnectAuth;
-  window.AgriConnectDB = AgriConnectDB;
-  window.AgriConnectAPI = AgriConnectAPI;
-}
 if (typeof global !== 'undefined') {
   global.AgriConnectAuth = AgriConnectAuth;
   global.AgriConnectDB = AgriConnectDB;
-  global.AgriConnectAPI = AgriConnectAPI;
+  if (typeof AgriConnectAPI !== 'undefined') {
+    global.AgriConnectAPI = AgriConnectAPI;
+  }
 }

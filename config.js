@@ -25,18 +25,13 @@
       }
     } catch (e) {}
 
-    // 2. Global variable or Vite environment variable override
+    // 2. Global variable override
     if (typeof window !== 'undefined' && window.AGRICONNECT_API_URL) {
       return String(window.AGRICONNECT_API_URL).trim().replace(/\/+$/, '');
     }
     if (typeof window !== 'undefined' && window.VITE_API_URL) {
       return String(window.VITE_API_URL).trim().replace(/\/+$/, '');
     }
-    try {
-      if (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_URL) {
-        return String(import.meta.env.VITE_API_URL).trim().replace(/\/+$/, '');
-      }
-    } catch (e) {}
 
     // 3. Local development environment detection (localhost / 127.0.0.1 on any port or file protocol)
     if (typeof window !== 'undefined' && window.location) {

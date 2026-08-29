@@ -7,9 +7,10 @@ const Surveyor = require('../models/Surveyor');
  * Helper to generate signed JWT
  */
 const generateToken = (userId, role) => {
+  const secret = process.env.JWT_SECRET || 'agriconnect_secure_jwt_secret_key_2026_fallback';
   return jwt.sign(
     { userId, role },
-    process.env.JWT_SECRET,
+    secret,
     { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
   );
 };
@@ -150,6 +151,14 @@ const login = async (req, res) => {
       });
     }
 
+    // Ensure MongoDB connection is healthy
+    if (require('mongoose').connection.readyState !== 1) {
+      return res.status(503).json({
+        success: false,
+        message: 'Database is currently unavailable or connecting. Please try again shortly.'
+      });
+    }
+
     // Find user by email or mobile
     let user = await User.findOne({
       $or: [
@@ -231,10 +240,10 @@ const login = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Login error:', error.message);
+    console.error('Login error:', error.name, error.message);
     return res.status(500).json({
       success: false,
-      message: 'Server error during login'
+      message: 'Server error during login. Please try again later.'
     });
   }
 };
