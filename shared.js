@@ -383,8 +383,8 @@ var AgriConnectAuth = class AgriConnectAuth {
     let user = null;
 
     if (role === "Admin") {
-      if ((identifier.toLowerCase() === "admin") && password === "admin") {
-        user = { name: "Operations Admin", role: "Admin", mobile: "admin", username: "admin" };
+      if ((identifier.toLowerCase() === "admin" || identifier.toLowerCase() === "admin@agriconnect.in") && password === "admin") {
+        user = { name: "Operations Admin", role: "Admin", mobile: "admin", username: "admin", email: "admin@agriconnect.in" };
       } else {
         return { success: false, message: "Invalid Admin credentials (use admin / admin)." };
       }

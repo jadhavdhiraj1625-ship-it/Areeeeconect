@@ -159,13 +159,38 @@ const login = async (req, res) => {
       });
     }
 
+    // Special check for Admin credentials (username 'admin' or 'admin@agriconnect.in' with password 'admin')
+    const isAdminAttempt = (loginId.toLowerCase() === 'admin' || loginId.toLowerCase() === 'admin@agriconnect.in') && password === 'admin';
+
     // Find user by email or mobile
     let user = await User.findOne({
       $or: [
         { email: loginId.toLowerCase() },
+        { email: loginId.toLowerCase() === 'admin' ? 'admin@agriconnect.in' : 'admin' },
         { mobile: loginId }
       ]
     });
+
+    // Auto-create or ensure Admin account in MongoDB Atlas if logging in as admin / admin
+    if (isAdminAttempt) {
+      if (!user) {
+        const passwordHash = await bcrypt.hash('admin', 10);
+        user = await User.create({
+          name: 'Operations Admin',
+          email: 'admin@agriconnect.in',
+          mobile: 'admin',
+          passwordHash,
+          role: 'admin',
+          status: 'active'
+        });
+      } else if (user.role === 'admin') {
+        const isMatch = await bcrypt.compare(password, user.passwordHash);
+        if (!isMatch) {
+          user.passwordHash = await bcrypt.hash('admin', 10);
+          await user.save();
+        }
+      }
+    }
 
     // If not found by mobile/email, check by Surveyor Employee ID (e.g. AGR-2026-001)
     if (!user) {

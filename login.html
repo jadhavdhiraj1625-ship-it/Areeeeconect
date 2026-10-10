@@ -315,7 +315,7 @@
     document.getElementById('login-role-val').value = role;
     document.getElementById('login-btn-text').textContent = `Sign In as ${role}`;
     const labels = { Farmer:'Mobile Number', Surveyor:'Mobile / Employee ID', Admin:'Username / Email' };
-    const phs    = { Farmer:'Enter your 10-digit mobile number', Surveyor:'Mobile or Employee ID (e.g. AGR-2026-001)', Admin:'Enter admin email (admin@agriconnect.in)' };
+    const phs    = { Farmer:'Enter your 10-digit mobile number', Surveyor:'Mobile or Employee ID (e.g. AGR-2026-001)', Admin:'admin or admin@agriconnect.in' };
     document.getElementById('lbl-username').textContent    = labels[role];
     document.getElementById('login-username').placeholder  = phs[role];
     ['Farmer','Surveyor','Admin'].forEach(r =>
