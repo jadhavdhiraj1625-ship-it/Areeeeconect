@@ -55,7 +55,7 @@ const corsOptions = {
         return regex.test(origin);
       }
       return false;
-    }) || origin.endsWith('.vercel.app') || /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin);
+    }) || origin === 'null' || origin.endsWith('.vercel.app') || /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin);
 
     if (isMatch) {
       callback(null, true);

@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "AgriConnect Frontend Static Site",
   "scripts": {
+    "dev": "node serve.js",
+    "serve": "node serve.js",
+    "start": "node serve.js",
     "build": "echo 'Static HTML build ready'"
   }
 }

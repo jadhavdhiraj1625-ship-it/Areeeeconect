@@ -40,37 +40,31 @@ class AgriConnectAPI {
       return window.API_BASE_URL.replace(/\/+$/, '');
     }
 
-    // 3. Environment detection
-    if (
-      typeof window !== 'undefined' &&
-      window.location
-    ) {
+    // 3. Environment detection & Local development
+    if (typeof window !== 'undefined' && window.location) {
+      const protocol = window.location.protocol;
       const hostname = window.location.hostname;
+      const port = String(window.location.port || '');
 
-      const isLocal =
-        hostname === 'localhost' ||
-        hostname === '127.0.0.1' ||
-        hostname === '';
-
-      // Local development
-      if (isLocal) {
-        if (
-          window.location.port === '5000' ||
-          window.location.port === 5000
-        ) {
-          return `${window.location.protocol}//${
-            hostname || 'localhost'
-          }:5000/api`;
+      let wantsLocalBackend = false;
+      try {
+        if (typeof localStorage !== 'undefined' && localStorage.getItem('USE_LOCAL_BACKEND') === 'true') {
+          wantsLocalBackend = true;
         }
-
-        return 'http://localhost:5000/api';
+      } catch (e) {}
+      if (window.USE_LOCAL_BACKEND === true) {
+        wantsLocalBackend = true;
       }
 
-      // Production backend on Render
-      return 'https://agreeconnect-backend.onrender.com/api';
+      // If running on local HTTP server (localhost or 127.0.0.1)
+      if ((protocol === 'http:' || protocol === 'https:') && (hostname === 'localhost' || hostname === '127.0.0.1')) {
+        if (port === '5000' || wantsLocalBackend) {
+          return `${protocol}//${hostname}:5000/api`;
+        }
+      }
     }
 
-    // Final fallback
+    // 4. Default for production, Vercel, and file:/// URLs: ALWAYS production Render backend
     return 'https://agreeconnect-backend.onrender.com/api';
   }
 

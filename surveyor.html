@@ -283,9 +283,13 @@
       if (!badge) return;
       try {
         const res = await AgriConnectAPI.apiGet('/health');
-        if (res && res.success) {
+        if (res && res.success && res.database === 'connected') {
           badge.innerHTML = '<i class="fa-solid fa-circle-check" style="color:#4ade80;"></i> Atlas DB: <strong>Connected</strong>';
           badge.style.background = '#15803d';
+          badge.style.color = '#fff';
+        } else if (res && res.database === 'connecting') {
+          badge.innerHTML = '<i class="fa-solid fa-spinner fa-spin" style="color:#fde047;"></i> Atlas DB: <strong>Connecting...</strong>';
+          badge.style.background = '#854d0e';
           badge.style.color = '#fff';
         } else {
           badge.innerHTML = '<i class="fa-solid fa-triangle-exclamation" style="color:#fde047;"></i> Local Mode (Server Offline)';

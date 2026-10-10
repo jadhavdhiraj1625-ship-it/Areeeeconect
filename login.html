@@ -286,10 +286,18 @@
     if (!badge) return;
     try {
       const res = await AgriConnectAPI.apiGet('/health');
-      if (res && res.success) {
+      if (res && res.success && res.database === 'connected') {
         badge.innerHTML = '<i class="fa-solid fa-circle-check" style="color:#4ade80;"></i> Atlas DB: <strong>Connected</strong>';
         badge.style.background = 'rgba(34,197,94,0.2)';
         badge.style.color = '#86efac';
+      } else if (res && res.database === 'connecting') {
+        badge.innerHTML = '<i class="fa-solid fa-spinner fa-spin" style="color:#fde047;"></i> Atlas DB: <strong>Connecting...</strong>';
+        badge.style.background = 'rgba(234,179,8,0.2)';
+        badge.style.color = '#fef08a';
+      } else if (res && res.database === 'disconnected') {
+        badge.innerHTML = '<i class="fa-solid fa-triangle-exclamation" style="color:#f87171;"></i> Atlas DB: <strong>Disconnected</strong>';
+        badge.style.background = 'rgba(239,68,68,0.2)';
+        badge.style.color = '#fca5a5';
       } else {
         badge.innerHTML = '<i class="fa-solid fa-circle-exclamation" style="color:#fde047;"></i> Local Mode (Server Offline)';
         badge.style.background = 'rgba(234,179,8,0.2)';
@@ -383,7 +391,7 @@
         ? window.AgriConnectConfig.getBaseUrl()
         : ((typeof AgriConnectAPI !== 'undefined' && typeof AgriConnectAPI.getBaseUrl === 'function')
             ? AgriConnectAPI.getBaseUrl()
-            : ((typeof window !== 'undefined' && window.API_BASE_URL) ? window.API_BASE_URL : 'http://localhost:5000/api'));
+            : ((typeof window !== 'undefined' && window.API_BASE_URL) ? window.API_BASE_URL : 'https://agreeconnect-backend.onrender.com/api'));
 
       const rawRes = await fetch(baseUrl + '/auth/login', {
         method: 'POST',

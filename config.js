@@ -33,25 +33,42 @@
       return String(window.VITE_API_URL).trim().replace(/\/+$/, '');
     }
 
-    // 3. Local development environment detection (localhost / 127.0.0.1 on any port or file protocol)
+    // 3. Environment detection & Local development
     if (typeof window !== 'undefined' && window.location) {
+      const protocol = window.location.protocol;
       const hostname = window.location.hostname;
-      const isLocal = hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '';
-      if (isLocal) {
-        if (window.location.port === '5000' || window.location.port === 5000) {
-          return `${window.location.protocol}//${hostname || 'localhost'}:5000/api`;
+      const port = String(window.location.port || '');
+
+      // Check if user explicitly wants local backend during local development
+      let wantsLocalBackend = false;
+      try {
+        if (typeof localStorage !== 'undefined' && localStorage.getItem('USE_LOCAL_BACKEND') === 'true') {
+          wantsLocalBackend = true;
         }
-        return 'http://localhost:5000/api';
+      } catch (e) {}
+      if (window.USE_LOCAL_BACKEND === true) {
+        wantsLocalBackend = true;
       }
+
+      // If running on local HTTP server (localhost or 127.0.0.1)
+      if ((protocol === 'http:' || protocol === 'https:') && (hostname === 'localhost' || hostname === '127.0.0.1')) {
+        // If served directly by local backend on port 5000 or explicitly opted into local backend
+        if (port === '5000' || wantsLocalBackend) {
+          return `${protocol}//${hostname}:5000/api`;
+        }
+      }
+
+      // If opened via file:/// protocol or on any remote/production domain (e.g. *.vercel.app):
+      // ALWAYS use the live production Render backend
     }
 
-    // 4. Production fallback (Render backend)
+    // 4. Default for production, Vercel, and file:/// URLs: ALWAYS production Render backend
     return DEFAULT_RENDER_URL.replace(/\/+$/, '');
   }
 
   const isLocalEnv = (typeof window !== 'undefined' && window.location)
-    ? (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname === '')
-    : true;
+    ? (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+    : false;
 
   const AgriConnectConfig = {
     DEFAULT_RENDER_URL: DEFAULT_RENDER_URL,
